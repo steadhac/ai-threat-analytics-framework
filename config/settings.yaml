@@ -1,0 +1,73 @@
+# Configuration settings for AI/ML testing framework
+
+api:
+  base_url: "https://api.security-platform.ai"
+  token: "your-api-token-here"
+  timeout: 30
+  retry_attempts: 3
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+models:
+  classifier:
+    version: "1.0.0"
+    endpoint: "classify/single"
+  
+  llm:
+    version: "1.0.0"
+    endpoint: "llm/query"
+    max_tokens: 500
+  
+  embeddings:
+    model: "all-MiniLM-L6-v2"
+    dimensions: 768
+
+testing:
+  parallel_workers: 4
+  retry_attempts: 3
+  slow_test_threshold: 5.0  # seconds
+  
+baselines:
+  classification:
+    precision: 0.85
+    recall: 0.83
+    f1_score: 0.84
+    accuracy: 0.86
+  
+  anomaly_detection:
+    false_positive_rate: 0.05
+    true_positive_rate: 0.90
+
+thresholds:
+  semantic_similarity: 0.7
+  rouge_score: 0.45
+  anomaly_score: 0.8
+  confidence: 0.6
+
+security:
+  allowed_models:
+    - "security-platform-classifier-v1"
+    - "security-platform-llm-v1"
+    - "security-platform-embeddings-v1"
+  
+  required_guardrails:
+    - "content_filter"
+    - "rate_limit"
+    - "audit_log"
+  
+  pii_detection_enabled: true
+  encryption_required: true
+
+monitoring:
+  enable_metrics: true
+  log_level: "INFO"
+  json_logging: false
+  metrics_endpoint: "https://metrics.security-platform.ai"
+
+reports:
+  output_dir: "reports/"
+  html_report: true
+  allure_report: true
+  json_export: true
