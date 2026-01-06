@@ -3,10 +3,16 @@
 > A proof-of-concept framework demonstrating AI-powered security threat analysis and detection techniques.
 
 [![Python](https://img.shields.io/badge/Python-3.9+-3776AB.svg)](https://www.python.org/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E.svg)](https://www.javascript.com/)
 [![pytest](https://img.shields.io/badge/pytest-Latest-0A9EDC.svg)](https://pytest.org/)
+[![pytest-html](https://img.shields.io/badge/pytest--html-Latest-0A9EDC.svg)](https://pytest-html.readthedocs.io/)
+[![pytest-sugar](https://img.shields.io/badge/pytest--sugar-Latest-0A9EDC.svg)](https://github.com/Frozenball/pytest-sugar)
+[![pytest-emoji](https://img.shields.io/badge/pytest--emoji-Latest-0A9EDC.svg)](https://github.com/LewisGaul/pytest-emoji)
 [![PyYAML](https://img.shields.io/badge/PyYAML-YAML-CB171E.svg)](https://pyyaml.org/)
-[![Shell](https://img.shields.io/badge/Shell-Bash-89E051.svg)](https://www.gnu.org/software/bash/)
+[![Statistics](https://img.shields.io/badge/Statistics-stdlib-3776AB.svg)](https://docs.python.org/3/library/statistics.html)
+[![Regex](https://img.shields.io/badge/Regex-re-3776AB.svg)](https://docs.python.org/3/library/re.html)
+[![Requests](https://img.shields.io/badge/Requests-HTTP-2E8555.svg)](https://requests.readthedocs.io/)
+
+---
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
