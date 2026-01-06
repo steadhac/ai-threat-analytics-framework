@@ -11,8 +11,6 @@
 [![Statistics](https://img.shields.io/badge/Statistics-stdlib-3776AB.svg)](https://docs.python.org/3/library/statistics.html)
 [![Regex](https://img.shields.io/badge/Regex-re-3776AB.svg)](https://docs.python.org/3/library/re.html)
 [![Requests](https://img.shields.io/badge/Requests-HTTP-2E8555.svg)](https://requests.readthedocs.io/)
-
----
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
