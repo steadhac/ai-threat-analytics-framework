@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.9.6, pytest-7.0.0, pluggy-1.6.0 -- /Users/carosteadham/ai-threat-analytics-framework/venv/bin/python3
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase(PosixPath('/Users/carosteadham/ai-threat-analytics-framework/.hypothesis/examples'))
+metadata: {'Python': '3.9.6', 'Platform': 'macOS-15.7.2-x86_64-i386-64bit', 'Packages': {'pytest': '7.0.0', 'pluggy': '1.6.0'}, 'Plugins': {'timeout': '2.2.0', 'emoji': '0.2.0', 'html': '4.1.1', 'hypothesis': '6.92.1', 'Faker': '20.1.0', 'metadata': '3.1.1', 'cov': '4.1.0', 'sugar': '1.1.1', 'xdist': '3.5.0', 'allure-pytest': '2.13.2'}, 'JAVA_HOME': '/Users/carosteadham/Library/Java/JavaVirtualMachines/openjdk-21.0.1/Contents/Home'}
+rootdir: /Users/carosteadham/ai-threat-analytics-framework, configfile: setup.cfg
+plugins: timeout-2.2.0, emoji-0.2.0, html-4.1.1, hypothesis-6.92.1, Faker-20.1.0, metadata-3.1.1, cov-4.1.0, sugar-1.1.1, xdist-3.5.0, allure-pytest-2.13.2
+collecting ... collected 3 items
+
+tests_ai/test_classification.py::test_phishing_classification PASSED
+tests_ai/test_classification.py::test_malware_classification PASSED
+tests_ai/test_classification.py::test_spam_classification PASSED
+
+============================== 3 passed in 2.11s ===============================
