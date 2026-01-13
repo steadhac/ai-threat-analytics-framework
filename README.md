@@ -26,7 +26,69 @@ This framework showcases practical implementations of AI security concepts inclu
 - ✅ **Security-Focused** - Demonstrates AI safety techniques
 
 ---
+## 🏗️ Architecture
 
+```mermaid
+graph TB
+    subgraph Input["Input Layer"]
+        API["API/User Input"]
+        Config["Config<br/>settings.yaml"]
+    end
+
+    subgraph Core["Core Modules"]
+        AC["api_client.py<br/>HTTP Client"]
+        Helper["helpers.py<br/>Utilities"]
+        Logger["logger.py<br/>Logging"]
+        Metrics["metrics.py<br/>Performance"]
+        SecCheck["security_checks.py<br/>Validation"]
+        
+        AF["autofill_service.py<br/>Email Suggestions"]
+        TC["threat_classifier.py<br/>Threat Detection"]
+        GR["guardrails.py<br/>LLM Safety"]
+        Sum["summarizer.py<br/>Text Summary"]
+        AD["anomaly_utils.py<br/>Z-Score Analysis"]
+    end
+
+    subgraph Testing["Test Layer"]
+        TA["tests_ai/<br/>AI Tests"]
+        TP["tests_pipelines/<br/>Pipeline Tests"]
+    end
+
+    subgraph Output["Output Layer"]
+        Results["Test Results"]
+        Reports["HTML Reports"]
+        Logs["Logs & Metrics"]
+    end
+
+    API --> AC
+    Config --> Core
+    Logger --> Helper
+    Metrics --> Helper
+    SecCheck --> Helper
+    
+    AC --> AF
+    AC --> TC
+    AC --> GR
+    AC --> Sum
+    AC --> AD
+    
+    AF --> TA
+    TC --> TA
+    GR --> TA
+    Sum --> TA
+    AD --> TP
+    
+    TA --> Results
+    TP --> Results
+    Results --> Reports
+    Logger -.-> Logs
+    Metrics -.-> Logs
+
+    style Input fill:#e1f5e1
+    style Core fill:#e3f2fd
+    style Testing fill:#fff3e0
+    style Output fill:#f3e5f5
+```
 ## 🚀 Features
 
 | Feature | Description | Technology |
