@@ -1,390 +1,210 @@
 # 🚀 Setup & Usage Guide
 
-## AI & Threat Analytics Testing Framework
+## AI Threat Analytics Framework
 
 ### Prerequisites
 
-- ✅ Python 3.9+ (You have: Python 3.9.6)
+- ✅ Python 3.9+
 - ✅ pip package manager
-- ✅ API access (for full integration tests)
+- ✅ Virtual environment (recommended)
 
 ---
 
 ## 📦 Installation
 
-### 1. Basic Setup (Already in place!)
+### 1. Clone Repository
 
 ```bash
-cd /Users/carosteadham/selenium-testng-automation-framework/ai-threat-analytics-framework
+cd /Users/carosteadham/ai-threat-analytics-framework
 ```
-
-### 2. Install All Dependencies
-
-```bash
-# Install all required packages
-pip3 install -r requirements.txt
+2. Create Virtual Environment
+``` bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
-
-Or install just the essentials:
-
-```bash
-# Core testing dependencies
-pip3 install pytest pytest-xdist pytest-cov pytest-timeout
-pip3 install requests pyyaml numpy scipy scikit-learn jsonschema
+3. Install Dependencies
+``` bash
+pip install -r requirements.txt
 ```
-
-### 3. Configure Environment
-
-```bash
-# Copy example environment file
-cp .env.example .env
-
-# Edit .env with your settings
-nano .env
-```
-
-Add your API token:
-```bash
-security-platform_API_TOKEN=your_actual_token_here
-security-platform_API_BASE_URL=https://api.security-platform.ai
-```
-
----
-
-## 🧪 Running Tests
-
-### Quick Test Commands
-
-#### 1. Run Utility Tests (No API needed)
-These tests validate the framework utilities without requiring API access:
-
-```bash
-# Test anomaly detection utilities ✅ WORKS NOW
-python3 -m pytest tests_pipelines/test_anomaly_detection.py::test_anomaly_scoring_utility -v
-python3 -m pytest tests_pipelines/test_anomaly_detection.py::test_behavioral_anomaly_utility -v
-
-# Test security utilities
-python3 -m pytest tests_ai/test_llm_guardrails.py -k "test_pii" -v --collect-only
-```
-
-#### 2. List All Available Tests
-
-```bash
-# See all 67 tests
-python3 -m pytest --collect-only
-
-# Count by category
-python3 -m pytest --collect-only -q | grep "tests_ai" | wc -l
-python3 -m pytest --collect-only -q | grep "tests_pipelines" | wc -l
-```
-
-#### 3. Run Full Test Suite (Requires API)
-
-```bash
-# Using the test runner
-python3 run_tests.py --suite all --verbose
+##🧪 Running Tests
+Quick Start
+``` bash
+# Run all 31 tests
+python run_tests.py
 
 # Or with pytest directly
-python3 -m pytest -v
+pytest -v
 ```
+Run Specific Test Suites
 
-#### 4. Run Specific Test Suites
+``` bash
+# AI tests only (10 tests)
+python run_tests.py --suite ai
 
-```bash
-# AI/ML tests only
-python3 run_tests.py --suite ai --verbose
-
-# Pipeline tests only
-python3 run_tests.py --suite pipelines --verbose
-
-# Security tests only
-python3 run_tests.py --suite security --verbose
-
-# Integration tests
-python3 run_tests.py --suite integration --verbose
+# Pipeline tests only (21 tests)
+python run_tests.py --suite pipelines
 ```
+Advanced Options
+``` bash
+# With coverage report
+python run_tests.py --coverage
 
-#### 5. Advanced Options
+# Verbose output
+python run_tests.py -vv
 
-```bash
-# Run with coverage report
-python3 run_tests.py --suite all --coverage
+# Parallel execution (faster)
+python run_tests.py --parallel 4
 
-# Run tests in parallel (4 workers)
-python3 run_tests.py --suite all --parallel 4
+# Stop on first failure
+pytest -x
 
-# Run with Allure reporting
-python3 run_tests.py --suite all --allure
+# Run specific test file
+pytest tests_ai/test_llm_guardrails.py -v
 
-# Run specific markers
-python3 -m pytest -m "not slow" -v
+# Run with logging
+pytest -v --log-cli-level=INFO
 ```
+📊 Test Structure
+All 31 Tests Are Local Implementations
+No external API, no configuration, no tokens needed.
 
----
+Tests validate:
 
-## 📊 Test Categories
+✅ LLM Guardrails - Prompt injection & PII detection
+✅ Threat Classification - Phishing, malware, spam detection
+✅ Anomaly Detection - Z-score statistical analysis
+✅ Autofill Service - Email suggestion generation
+✅ Summarization - Text extraction & summarization
+✅ Data Validation - Pipeline quality checks
+✅ Integration - End-to-end ML workflows
 
-### ✅ Tests You Can Run Right Now (No API needed):
+``` bash
+# List all available tests
+pytest --collect-only -q
 
-1. **Security Utilities**
-   - PII detection
-   - Prompt injection detection
-   - Data validation
-
-2. **Anomaly Detection Utilities**
-   - Z-score calculations
-   - Behavioral anomaly scoring
-   - Drift detection algorithms
-
-3. **Helper Functions**
-   - Text normalization
-   - Fuzzy matching
-   - Schema validation
-
-```bash
-# Example: Run utility tests
-python3 -m pytest \
-  tests_pipelines/test_anomaly_detection.py::test_anomaly_scoring_utility \
-  tests_pipelines/test_anomaly_detection.py::test_behavioral_anomaly_utility \
-  -v
+# Count tests by module
+pytest tests_ai/ --collect-only -q | wc -l
+pytest tests_pipelines/ --collect-only -q | wc -l
 ```
-
-### 🔌 Tests Requiring API Connection:
-
-1. **LLM Guardrails** (`tests_ai/test_llm_guardrails.py`)
-   - Prompt injection blocking
-   - PII leakage prevention
-   - Content filtering
-
-2. **Classification** (`tests_ai/test_classification.py`)
-   - Model accuracy
-   - Zero-shot classification
-   - Multi-label classification
-
-3. **Summarization** (`tests_ai/test_summarization.py`)
-   - Quality metrics (ROUGE, BLEU)
-   - Hallucination detection
-   - Semantic similarity
-
-4. **Autofill** (`tests_ai/test_autofill.py`)
-   - Form detection
-   - Field mapping
-   - Security validation
-
-5. **Data Pipelines** (`tests_pipelines/test_data_pipelines.py`)
-   - ETL validation
-   - Embedding generation
-   - Schema compliance
-
-6. **Threat Detection** (`tests_pipelines/test_anomaly_detection.py`)
-   - Attack pattern detection
-   - Behavioral analysis
-   - Real-time monitoring
-
-7. **Integration** (`tests_pipelines/test_integration_ml.py`)
-   - End-to-end flows
-   - Service integration
-   - Performance testing
-
----
-
-## 🎯 Usage Examples
-
-### Example 1: Demo Mode (No API)
-
-```bash
-# Run utility tests to demonstrate framework capabilities
-python3 -m pytest \
-  tests_pipelines/test_anomaly_detection.py::test_anomaly_scoring_utility \
-  tests_pipelines/test_anomaly_detection.py::test_behavioral_anomaly_utility \
-  --verbose --tb=short
-```
-
-**Expected Output:**
-```
-tests_pipelines/test_anomaly_detection.py::test_anomaly_scoring_utility PASSED
-tests_pipelines/test_anomaly_detection.py::test_behavioral_anomaly_utility PASSED
-
-==================== 2 passed in 0.XX s ====================
-```
-
-### Example 2: With Mock API (Coming Soon)
-
-You can create mock API responses for testing:
-
-```python
-# In conftest.py, add:
-@pytest.fixture
-def mock_api_client(monkeypatch):
-    """Mock API client for testing without real API."""
-    def mock_post(*args, **kwargs):
-        return {"prediction": "test", "confidence": 0.9}
-    
-    monkeypatch.setattr("core.api_client.APIClient.post", mock_post)
-```
-
-### Example 3: Full Integration (With Real API)
-
-```bash
-# Set your API token
-export security-platform_API_TOKEN="your-token-here"
-
-# Run full test suite
-python3 run_tests.py --suite all --coverage --parallel 4 --verbose
-
-# Generate reports
-python3 run_tests.py --suite all --allure
-```
-
----
-
 ## 📈 Viewing Reports
-
-### HTML Report
-
-```bash
-# Run tests with HTML output
-python3 -m pytest --html=reports/results.html --self-contained-html
-
-# Open report
-open reports/results.html
+HTML Report (Auto-generated)
+``` bash
+# View test results
+open reports/test_results.html  # macOS
+xdg-open reports/test_results.html  # Linux
+start reports/test_results.html  # Windows
 ```
-
-### Coverage Report
-
-```bash
+Test Logs
+``` bash
+cat reports/test_logs.txt
+```
+Coverage Report
+``` bash
 # Generate coverage
-python3 -m pytest --cov=core --cov=tests_ai --cov=tests_pipelines --cov-report=html
+python run_tests.py --coverage
 
-# View coverage
-open htmlcov/index.html
+# View report
+open htmlcov/index.html  # macOS
+xdg-open htmlcov/index.html  # Linux
+start htmlcov/index.html  # Windows
 ```
+Allure Report (Interactive)
+``` bash
+# Generate Allure results
+pytest --alluredir=reports/allure-results
 
-### Allure Report (requires Allure CLI)
-
-```bash
-# Install Allure (macOS)
-brew install allure
-
-# Generate and serve report
-python3 run_tests.py --suite all --allure
+# Serve report (opens in browser)
 allure serve reports/allure-results
+
+# Or generate static HTML
+allure generate reports/allure-results -o reports/allure-report
+open reports/allure-report/index.html  # macOS
 ```
-
----
-
-## 🐛 Troubleshooting
-
-### Issue: Import Errors
-
-```bash
-# Solution: Install missing dependencies
-pip3 install scikit-learn scipy jsonschema sentence-transformers
+## 🎯 Usage Examples
+Example 1: Run All Tests
+``` bash
+========================== 31 passed in 0.39s ==========================
 ```
-
-### Issue: API Connection Errors
-
-```bash
-# Check your environment
-echo $security-platform_API_TOKEN
-
-# Verify API endpoint in config
-cat config/settings.yaml | grep base_url
+Example 2: Run AI Tests Only
+``` bash
+python run_tests.py --suite ai
 ```
+Example 3: Run with Coverage
+``` bash
+python run_tests.py --coverage
+```
+Example 4: Run Tests in Parallel
+``` bash
+python run_tests.py --parallel 4
+```
+Example 5: Run Specific Test File
+``` bash
+pytest tests_ai/test_llm_guardrails.py -v
+```
+## 
+🐛 Troubleshooting
+Issue: Module Import Errors
+``` bash
+# Reinstall dependencies
+pip install -r requirements.txt --force-reinstall
+```
+Issue: Tests Not Collecting
+``` bash
+# Verify pytest can find tests
+pytest --collect-only
 
-### Issue: Tests Taking Too Long
-
-```bash
+# Check directory structure
+ls tests_ai/ tests_pipelines/
+```
+Issue: Slow Test Execution
+``` bash
 # Run specific tests only
-python3 -m pytest tests_ai/test_llm_guardrails.py::test_prompt_injection_detection
+pytest tests_ai/test_classification.py
 
-# Or skip slow tests
-python3 -m pytest -m "not slow"
+# Or run in parallel
+python run_tests.py --parallel 4
 ```
+Issue: Port Already in Use (Allure)
+``` bash
+# Kill the process using the port
+lsof -i :8080 | grep LISTEN | awk '{print $2}' | xargs kill -9
 
----
-
-## 🔧 Configuration
-
-### Update API Settings
-
-Edit `config/settings.yaml`:
-
-```yaml
-api:
-  base_url: "https://your-api.com"
-  token: "${security-platform_API_TOKEN}"
-  timeout: 30
+# Or use a different port
+allure serve reports/allure-results --port 8081
 ```
+## 
+🔧 Configuration
+Test Configuration
+See setup.cfg for:
 
-### Adjust Test Thresholds
+Test discovery paths: testpaths = tests_ai tests_pipelines
+Logging configuration
+Coverage settings
+Pytest markers and filtering
+Project Settings
+See settings.yaml for:
 
-```yaml
-thresholds:
-  semantic_similarity: 0.7
-  rouge_score: 0.45
-  anomaly_score: 0.8
+Application defaults
+Test parameters
+Performance thresholds
+
+## ✨ Quick Reference
+``` bash
+# Full setup
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Run tests (choose one)
+python run_tests.py              # All tests
+python run_tests.py --suite ai   # AI tests
+python run_tests.py --coverage   # With coverage
+pytest -v                        # Direct pytest
+pytest tests_ai/ -v              # Specific module
+
+# View reports
+open reports/test_results.html   # HTML report
+cat reports/test_logs.txt        # Test logs
+open htmlcov/index.html          # Coverage
+allure serve reports/allure-results  # Allure
 ```
-
----
-
-## 📚 Framework Structure
-
-```
-67 Total Tests Available:
-  - 21 AI/ML Tests (tests_ai/)
-  - 30 Pipeline Tests (tests_pipelines/)
-  - 16 Integration Tests
-```
-
-### Test Breakdown:
-
-- **LLM Guardrails**: 21 tests
-- **Classification**: 13 tests
-- **Summarization**: 11 tests
-- **Autofill**: 16 tests
-- **Data Pipelines**: 16 tests
-- **Anomaly Detection**: 13 tests
-- **Integration**: 11 tests
-
----
-
-## ✨ Next Steps
-
-1. **Install Dependencies**
-   ```bash
-   pip3 install -r requirements.txt
-   ```
-
-2. **Set Up Environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your credentials
-   ```
-
-3. **Run Demo Tests**
-   ```bash
-   python3 -m pytest tests_pipelines/test_anomaly_detection.py::test_anomaly_scoring_utility -v
-   ```
-
-4. **Configure API Endpoint**
-   - Update `config/settings.yaml` with real API URL
-   - Add API token to `.env`
-
-5. **Run Full Suite**
-   ```bash
-   python3 run_tests.py --suite all --verbose --coverage
-   ```
-
----
-
-## 📞 Support
-
-For issues or questions:
-- Check the [README.md](README.md)
-- Review test files for examples
-- Check `conftest.py` for available fixtures
-
----
-
-**Ready to test AI systems with confidence!** 🚀
