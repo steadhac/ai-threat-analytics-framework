@@ -20,7 +20,7 @@
 This framework showcases practical implementations of AI security concepts including threat classification, anomaly detection, LLM guardrails, and automated summarization. Built with clean code, comprehensive testing, and documentation.
 
 **Key Highlights:**
-- ✅ **7 Working Tests** - 100% passing rate
+- ✅ **31 Working Tests** - 100% passing rate
 - ✅ **Real Implementations** - No mocks, actual working algorithms
 - ✅ **Complete Documentation** - Test plans, cases, and traceability
 - ✅ **Security-Focused** - Demonstrates AI safety techniques
@@ -177,8 +177,6 @@ pip install allure-pytest  # Already in [requirements.txt](http://_vscodecontent
 # Run tests with Allure results generation
 pytest --alluredir=reports/allure-results
 
-# Or use the custom runner
-python run_tests.py
 ```
 **View Allure Report**
 ``` bash
