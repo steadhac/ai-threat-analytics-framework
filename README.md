@@ -104,41 +104,105 @@ graph TB
 
 ## ⚡ Quick Start
 
+
+### 1. Clone the repository
 ```bash
-# 1. Clone the repository
 git clone https://github.com/steadhac/ai-threat-analytics-framework.git
 cd ai-threat-analytics-framework
-
-# 2. Create virtual environment
+```
+### 2. Create virtual environment
+```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-# 3. Install dependencies
+### 3. Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
-# 4. Run all tests
+### 4. Run Tests
+
+### Primary Method: `python run_tests.py`
+Use this for normal test execution. It's pre-configured via [setup.cfg](setup.cfg) with all project settings, automatically generates reports, and captures logs.
+
+```bash
+# Run all tests
 python run_tests.py
 
-# AI functionality tests
+# Run specific test suite
+python run_tests.py --suite ai
+python run_tests.py --suite pipelines
+
+# Run with options
+python run_tests.py --coverage      # Generate coverage report
+python run_tests.py -vv             # Verbose output
+python run_tests.py --parallel 4    # Run in parallel (faster)
+```
+### Configuration: See setup.cfg for test discovery, logging, and markers configuration.
+
+### Alternative Method: pytest directly
+Use pytest when you need to run specific test files or have custom pytest requirements.
+```bash
+# Run specific test files
 pytest tests_ai/test_classification.py -v
 pytest tests_ai/test_llm_guardrails.py -v
-
-# Pipeline tests
 pytest tests_pipelines/test_anomaly_detection.py -v
-
-# 5. Generate HTML report
-pytest --html=reports/test_results.html --self-contained-html
-
-# Open in browser
+```
+### 5. View Reports
+```bash
+# HTML Report (automatically generated)
 open reports/test_results.html  # macOS
 xdg-open reports/test_results.html  # Linux
 start reports/test_results.html  # Windows
 
-# Test Coverage
-pytest --cov=core --cov-report=html
-open htmlcov/index.html
-```
 
+# Test Logs
+cat reports/test_logs.txt
+
+# Coverage Report
+python run_tests.py --coverage
+open htmlcov/index.html  # macOS
+```
+### Allure Reports (Alternative)
+
+Generate and serve interactive Allure test reports for detailed test analytics and visualization.
+
+#### Prerequisites
+```bash
+pip install allure-pytest  # Already in [requirements.txt](http://_vscodecontentref_/0)
+```
+**Generate Allure Results**
+``` bash
+# Run tests with Allure results generation
+pytest --alluredir=reports/allure-results
+
+# Or use the custom runner
+python run_tests.py
+```
+**View Allure Report**
+``` bash
+# Start Allure server (opens in browser automatically)
+allure serve reports/allure-results
+```
+This command will:
+
+-Start a local web server on http://localhost:8080
+-Open the Allure dashboard in your default browser
+-Display detailed test metrics, timeline, error traces, and trends
+-Press Ctrl+C to stop the server
+-Generate Static Allure HTML (No Server)
+
+**Generate Static Allure HTML (No Server)**
+``` bash
+# Generate standalone HTML report
+allure generate reports/allure-results -o reports/allure-report
+
+# View the report
+open reports/allure-report/index.html  # macOS
+xdg-open reports/allure-report/index.html  # Linux
+start reports\allure-report\index.html  # Windows
+```
 ## Project Structure
 
 The project follows this directory structure:
