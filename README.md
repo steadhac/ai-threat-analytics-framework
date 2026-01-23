@@ -27,7 +27,6 @@ This framework showcases practical implementations of AI security concepts inclu
 
 ---
 ## 🏗️ Architecture
-
 ```mermaid
 graph TB
     subgraph Input["Input Layer"]
@@ -50,13 +49,22 @@ graph TB
     end
 
     subgraph Testing["Test Layer"]
-        TA["tests_ai/<br/>AI Tests"]
-        TP["tests_pipelines/<br/>Pipeline Tests"]
+        subgraph AITests["AI Tests (26 cases)"]
+            TAUnit["Unit Tests<br/>Autofill, Classification,<br/>Summarization"]
+            TASecurity["Security Tests<br/>Injection, Guardrails,<br/>Core Patterns"]
+            TAEdge["Edge Case Tests<br/>Whitespace, Case,<br/>Special Characters,<br/>Encoding (18 cases)"]
+        end
+        
+        subgraph PipelineTests["Pipeline Tests (24 cases)"]
+            TPUnit["Unit Tests<br/>Anomaly Detection,<br/>Data Validation"]
+            TPEdge["Edge Case Tests<br/>Threshold Sensitivity,<br/>Scale Independence"]
+            TPInteg["Integration Tests<br/>ML Pipeline Flow"]
+        end
     end
 
     subgraph Output["Output Layer"]
         Results["Test Results"]
-        Reports["HTML Reports"]
+        Reports["HTML Reports<br/>Allure Reports"]
         Logs["Logs & Metrics"]
     end
 
@@ -72,14 +80,22 @@ graph TB
     AC --> Sum
     AC --> AD
     
-    AF --> TA
-    TC --> TA
-    GR --> TA
-    Sum --> TA
-    AD --> TP
+    AF --> TAUnit
+    TC --> TAUnit
+    TC --> TASecurity
+    GR --> TASecurity
+    GR --> TAEdge
+    Sum --> TAUnit
+    AD --> TPUnit
+    AD --> TPEdge
     
-    TA --> Results
-    TP --> Results
+    TAUnit --> Results
+    TASecurity --> Results
+    TAEdge --> Results
+    TPUnit --> Results
+    TPEdge --> Results
+    TPInteg --> Results
+    
     Results --> Reports
     Logger -.-> Logs
     Metrics -.-> Logs
@@ -87,6 +103,8 @@ graph TB
     style Input fill:#e1f5e1
     style Core fill:#e3f2fd
     style Testing fill:#fff3e0
+    style AITests fill:#ffe0b2
+    style PipelineTests fill:#ffe0b2
     style Output fill:#f3e5f5
 ```
 ## 🚀 Features
