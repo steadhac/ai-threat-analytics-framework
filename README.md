@@ -20,11 +20,11 @@
 This framework showcases practical implementations of AI security concepts including threat classification, anomaly detection, LLM guardrails, and automated summarization. Built with clean code, comprehensive testing, and documentation.
 
 **Key Highlights:**
-- ✅ **31 Working Tests** - 100% passing rate
+- ✅ **50+ Working Tests** - 100% passing rate
 - ✅ **Real Implementations** - No mocks, actual working algorithms
+- ✅ **Edge Case Coverage** - Comprehensive test scenarios and boundary conditions
 - ✅ **Complete Documentation** - Test plans, cases, and traceability
 - ✅ **Security-Focused** - Demonstrates AI safety techniques
-
 ---
 ## 🏗️ Architecture
 ```mermaid
