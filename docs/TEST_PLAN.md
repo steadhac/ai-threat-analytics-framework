@@ -12,6 +12,7 @@ This test plan defines the testing strategy, scope, and approach for the AI Thre
 - Anomaly detection with statistical analysis (Z-score)
 - End-to-end ML pipeline integration
 - Autofill and text summarization functionality
+- LLM guardrails edge case testing (unusual inputs, special characters, encoding variations)
 
 ### 1.3 Test Objectives
 - Verify threat classification accuracy across multiple threat types
@@ -72,9 +73,11 @@ test_classification.py	test_spam_classification()	Unit	1	Spam detection accuracy
 test_llm_guardrails.py	test_prompt_injection_blocking()	Security	2 (malicious + safe)	Injection attack blocking
 test_llm_guardrails.py	test_llm_guardrails_multiple_scenarios()	Security	5 parametrized	Multiple attack patterns
 test_llm_guardrails.py	test_llm_guardrails_core_patterns()	Security	4 parametrized	Core confirmed patterns
+test_llm_guardrails.py	test_llm_guardrails_edge_cases()	Edge Case	18 parametrized	Edge case robustness (whitespace, case, special chars, obfuscation)
 test_autofill.py	test_autofill_generation()	Unit	1	Email suggestion generation
 test_summarization.py	test_summarization_accuracy()	Unit	1	Text summarization
-Total AI Tests: 16 test cases
+
+Total AI Tests: 34 test cases
 
 ### 4.2 Data Pipeline Tests (tests_pipelines/)
 
@@ -95,15 +98,15 @@ Parametrized tests validate nondeterministic outputs are controlled and predicta
 ## 5. Test Schedule & Execution Time
 
 Phase	Test Count	Duration	Status
-AI/ML Tests	16 cases	~2-3 min	Core functionality
+AI/ML Tests	34 cases	~3-4 min	Core functionality + edge cases
 Pipeline Tests	16 cases	~2-3 min	Data flow validation
-Full Suite	32 total	~4-6 min	Comprehensive
+Full Suite	50 total	~5-7 min	Comprehensive
 HTML Report Generation	1	~30 sec	Documentation
-Total expected execution: 4-7 minutes
+Total expected execution: 5-7 minutes
 
 ## 6. Test Deliverables
 
-Automated test execution: pytest suite with 32+ test cases
+Automated test execution: pytest suite with 50+ test cases
 Test execution reports: HTML reports (test_results.html)
 Code coverage reports: htmlcov/index.html
 Test artifacts: Detailed logging output
@@ -120,7 +123,7 @@ All test files present in tests_ai/ and tests_pipelines/
 
 ### 7.2 Exit Criteria
 
-All 32+ test cases executed
+All 50+ test cases executed
 Pass rate = 100% (no failures)
 Test coverage ≥ 80% on core modules
 HTML test report generated and reviewed
@@ -248,8 +251,8 @@ This comprehensive test plan, including the parametrized test strategy for nonde
 
 ---
 
-**Last Updated**: January 8, 2026
+**Last Updated**: January 22, 2026
 **Test Framework**: pytest with plugins
-**Total Test Cases**: 32+
-**Expected Duration**: 4-7 minutes
+**Total Test Cases**: 50+
+**Expected Duration**: 5-7 minutes
 **AI Assistant**: Claude (Anthropic)
