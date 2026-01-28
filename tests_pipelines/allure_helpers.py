@@ -43,3 +43,52 @@ def attach_stage_details(stage_name, details):
     allure.attach(details, 
                  name=f"{stage_name} Details", 
                  attachment_type=allure.attachment_type.TEXT)
+
+def attach_vulnerabilities_mitigated():
+    """Helper to attach complete vulnerabilities mitigated reference to report.
+    
+    Used by: Test suite initialization
+    Purpose: Document all OWASP Agentic AI threats addressed by test suite
+    Displays: Vulnerabilities Mitigated section in Allure report
+    """
+    vulnerabilities_reference = """
+OWASP AGENTIC AI THREATS MITIGATED
+
+T2 (Tool Misuse)
+    Risk: Malformed data could cause tools to execute incorrectly or access unauthorized resources
+    Mitigation: Dual-field validation (status + value) ensures tools receive correct data format
+    Implementation: Filter invalid records before processing prevents tool confusion
+
+T4 (Resource Overload)
+    Risk: Processing null values can cause memory leaks and resource starvation
+    Mitigation: Early filtering removes problematic records before they consume resources
+    Implementation: Detect and remove null/malformed records at validation stage
+
+T5 (Cascading Hallucination)
+    Risk: Invalid data in model features leads to incorrect predictions and hallucinations
+    Mitigation: Multi-stage validation ensures only clean data reaches ML systems
+    Implementation: Data quality assurance prevents corrupted inputs to ML models
+
+T6 (Intent Breaking)
+    Risk: Execution path deviation through data manipulation or invalid inputs
+    Mitigation: Deterministic filtering logic prevents unauthorized execution deviations
+    Implementation: Validation ensures expected execution flow and data integrity
+
+T8 (Repudiation & Untraceability)
+    Risk: Silent data quality failures hide system issues and prevent root cause analysis
+    Mitigation: Comprehensive logging provides audit trail for compliance and debugging
+    Implementation: Log all filtering decisions with record IDs and rejection reasons
+
+T9 (Identity Spoofing)
+    Risk: Invalid status markers indicate tampered or spoofed records in pipeline
+    Mitigation: Dual validation prevents spoofed records from entering ML pipeline
+    Implementation: Metadata validation (status field) confirms record legitimacy
+
+T12 (Insecure Output Handling)
+    Risk: Outputting invalid data corrupts downstream systems and models
+    Mitigation: Strict output validation ensures data quality guarantee to consumers
+    Implementation: Only pass filtered records to ML models and storage systems
+"""
+    allure.attach(vulnerabilities_reference, 
+                 name="Vulnerabilities Mitigated", 
+                 attachment_type=allure.attachment_type.TEXT)

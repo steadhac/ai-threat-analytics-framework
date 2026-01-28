@@ -2,7 +2,7 @@
 import pytest
 import yaml
 from pathlib import Path
-
+from tests_pipelines.allure_helpers import attach_vulnerabilities_mitigated
 
 @pytest.fixture(scope="session")
 def config():
@@ -60,3 +60,14 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
         if "test_llm" in str(item.fspath) or "test_classification" in str(item.fspath):
             item.add_marker(pytest.mark.ml)
+
+@pytest.fixture(scope="session", autouse=True)
+def attach_vulnerabilities_report():
+    """Attach OWASP vulnerability mitigations to Allure report."""
+    # Yield to let tests run, then attach after first test starts
+    yield
+    # This will execute once per session
+    try:
+        attach_vulnerabilities_mitigated()
+    except:
+        pass  # Ignore if Allure context not available
