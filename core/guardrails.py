@@ -121,6 +121,7 @@ class LLMGuardrails:
         # PROMPT INJECTION: Override system instructions
         prompt_patterns = [
             r'ignore\s+(previous|all)\s+instructions',
+            r'override\s+(system\s+)?prompt',
             r'disregard\s+all\s+rules',
             r'reveal\s+system\s+prompt'
         ]

@@ -50,7 +50,7 @@ def mock_production_data():
 
 
 @allure.feature("Anomaly Detection")
-@allure.story("Gap Resolution")
+@allure.story("Production Reality Gap Fix")
 @allure.title("Demonstrating Gap Fix: Adaptive Thresholding + Alert Grouping")
 def test_improvement_demo_adaptive_vs_fixed(mock_production_data):
     """
@@ -180,7 +180,7 @@ def test_improvement_demo_adaptive_vs_fixed(mock_production_data):
 
 
 @allure.feature("Anomaly Detection")
-@allure.story("Gap Resolution")
+@allure.story("Production Reality Gap Fix")
 @allure.title("Understanding Check: Explain Alert Grouping Logic")
 def test_alert_grouping_logic_explanation():
     """

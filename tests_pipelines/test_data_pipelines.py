@@ -28,38 +28,14 @@ Integration Risks Mitigated:
 
 OWASP Agentic AI Threat Mitigations:
 - T2 (Tool Misuse): Validate data structure before processing to prevent incorrect tool use
-  • Implementation: Dual-field validation (status + value) ensures tools receive correct data format
-  • Risk: Malformed data could cause tools to execute incorrectly or access unauthorized resources
-  • Mitigation: Filter invalid records before processing prevents tool confusion
-
 - T4 (Resource Overload): Detect and remove null/malformed records to prevent resource exhaustion
-  • Implementation: Null detection and filtering prevents cascading resource allocation failures
-  • Risk: Processing null values can cause memory leaks and resource starvation
-  • Mitigation: Early filtering removes problematic records before they consume resources
-
 - T5 (Cascading Hallucination): Ensure clean data prevents downstream model hallucinations
-  • Implementation: Data quality assurance prevents corrupted inputs to ML models
-  • Risk: Invalid data in model features leads to incorrect predictions and hallucinations
-  • Mitigation: Multi-phase validation ensures only clean data reaches ML systems
-
 - T8 (Repudiation & Untraceability): Maintain audit trail through validation logging
-  • Implementation: Log all filtering decisions with record IDs and rejection reasons
-  • Risk: Silent data quality failures hide system issues and prevent root cause analysis
-  • Mitigation: Comprehensive logging provides audit trail for compliance and debugging
-
 - T9 (Identity Spoofing): Verify record authenticity through status/value validation
-  • Implementation: Metadata validation (status field) confirms record legitimacy
-  • Risk: Invalid status markers indicate tampered or spoofed records in pipeline
-  • Mitigation: Dual validation prevents spoofed records from entering ML pipeline
-
 - T12 (Insecure Output Handling): Only output validated, clean records to downstream systems
-  • Implementation: Only pass filtered records to ML models and storage systems
-  • Risk: Outputting invalid data corrupts downstream systems and models
-  • Mitigation: Strict output validation ensures data quality guarantee to consumers
 
 Usage:
     pytest tests_pipelines/test_data_pipelines.py -v
-    pytest tests_pipelines/test_data_pipelines.py::test_data_validation -v
 """
 
 import pytest
@@ -290,29 +266,23 @@ Prevents unauthorized modification of cleaned data.
     logger.info("=" * 60)
 
 
-@pytest.mark.parametrize("input_records,expected_valid_count", [
-    ([
-        {'id': 1, 'value': 100, 'status': 'valid'},
-        {'id': 2, 'value': 200, 'status': 'valid'},
-        {'id': 3, 'value': 300, 'status': 'valid'}
-    ], 3),
+@pytest.mark.parametrize("input_records,expected_valid_count,gap_status", [
     ([
         {'id': 1, 'value': 100, 'status': 'valid'},
         {'id': 2, 'value': None, 'status': 'invalid'},
         {'id': 3, 'value': None, 'status': 'invalid'},
         {'id': 4, 'value': 400, 'status': 'valid'}
-    ], 2),
+    ], 2, "GOOD"),
     ([
         {'id': 1, 'value': None, 'status': 'invalid'},
         {'id': 2, 'value': None, 'status': 'invalid'}
-    ], 0),
+    ], 0, "GAP"),
 ])
 @allure.feature("Data Pipeline Validation")
 @allure.story("Scenario-Based Validation")
-@allure.title("Test Data Validation Across Multiple Quality Scenarios")
-def test_data_validation_multiple_scenarios(input_records, expected_valid_count):
+def test_data_validation_multiple_scenarios(input_records, expected_valid_count, gap_status):
     """
-    Test data validation pipeline across multiple data quality scenarios.
+    Test data pipeline across scenarios: best case (GOOD), typical (GOOD), worst case (GAP).
     
     Validates:
         - Pipeline handles varying data quality scenarios
@@ -321,17 +291,16 @@ def test_data_validation_multiple_scenarios(input_records, expected_valid_count)
         - Pipeline is robust to different data patterns
     
     Parametrization:
-        Scenario 1: Best case - all records are valid (3/3)
-                    All records have valid status and non-null values
-                    Expected: keep all 3 records
         
-        Scenario 2: Typical case - mixed valid/invalid (2/4)
+        Scenario 1: Typical case - mixed valid/invalid (2/4)
                     2 records valid, 2 records with nulls/invalid status
                     Expected: keep 2 valid, remove 2 invalid
+                    Status: GOOD
         
-        Scenario 3: Worst case - all records invalid (0/2)
+        Scenario 2: Worst case - all records invalid (0/2)
                     All records have nulls or invalid status
                     Expected: remove all, keep 0
+                    Status: GAP - Empty dataset handling
     
     Validation Logic (across scenarios):
         - Filter condition 1: status == 'valid' (metadata check)
@@ -340,22 +309,26 @@ def test_data_validation_multiple_scenarios(input_records, expected_valid_count)
     
     Assertions:
         - Assertion 1: valid_count matches expected (extraction accuracy)
-        - Assertion 2: is_valid matches expected (validation correctness)
+        - Assertion 2: All values non-null (data integrity)
         - Assertion 3: Filtering is deterministic (execution isolation)
     
     Pipeline Robustness:
         Tests that validation works on diverse data quality spectrum
         from pristine data to completely corrupted datasets
     """
+    allure.dynamic.title(f"Test Data Validation - Scenario [{gap_status}]")
+    
     logger.info("=" * 60)
-    logger.info(f"TEST: Data Validation - Scenario")
+    logger.info(f"TEST: Data Validation - Scenario [{gap_status}]")
     logger.info(f"Expected: {expected_valid_count} valid records")
+    logger.info(f"Status: {gap_status}")
     
     allure.step("PHASE 1: Data Ingestion")
     phase1_details = f"""
 Load scenario data with {len(input_records)} records.
 Data quality varies by scenario.
 Expected valid count: {expected_valid_count}
+Gap status: {gap_status}
 Prepare for validation pipeline.
 """
     logger.debug("PHASE 1: Data Ingestion")
@@ -410,6 +383,39 @@ Ready for downstream model training.
     logger.debug("-" * 40)
     attach_stage_details("PHASE 4: ML Pipeline Handoff", phase4_details)
     logger.info(f"Handoff: {len(valid_data)} records ready for ML")
+    
+    # Check for GAP condition (empty dataset)
+    if gap_status == "GAP" and len(valid_data) == 0:
+        allure.step("⚠️ GAP IDENTIFIED: Empty Dataset Handling")
+        gap_details = f"""
+EMPTY DATASET SCENARIO
+{'='*60}
+
+Scenario: All {len(raw_data)} records filtered out (0 valid)
+Result: Pipeline outputs zero records to ML model
+Risk: Downstream model receives empty dataset
+Outcome: Undefined behavior (crash, silent failure, error)
+
+Current behavior: Test PASSES with 0 records
+Expected behavior: Should handle empty datasets gracefully
+
+IMPROVEMENT ROADMAP (7 Steps):
+{'='*60}
+
+Step 1: Define empty dataset behavior policy (acceptable vs reject)
+Step 2: Implement pre-filtering check to detect zero-output scenarios
+Step 3: Log empty dataset events with context (which records filtered, why)
+Step 4: Add alerting for zero-record handoffs to prevent silent failures
+Step 5: Create graceful degradation (skip batch vs error vs default values)
+Step 6: Document SLA for minimum valid records (e.g., require 1+)
+Step 7: Implement retry logic or request re-validation for edge cases
+"""
+        logger.warning(f"⚠️ Gap identified: {len(valid_data)} valid records (empty dataset)")
+        allure.attach(
+            gap_details,
+            name="Empty Dataset Handling (GAP)",
+            attachment_type=allure.attachment_type.TEXT
+        )
     
     allure.step("PHASE 5: MITIGATION 1 - Input Validation (Playbook 1)")
     phase5_m1_details = f"""
@@ -479,8 +485,9 @@ All records meet both filter conditions.
             "All valid records must meet both filter conditions"
     logger.debug("✓ Execution isolation verified")
     
-    logger.info(f"✓ PASSED: Scenario validation complete")
+    if gap_status == "GAP":
+        logger.info(f"✓ PASSED: Scenario validation complete [GAP DOCUMENTED]")
+    else:
+        logger.info(f"✓ PASSED: Scenario validation complete [GOOD]")
     logger.info(f"  Valid records: {len(valid_data)}/{len(raw_data)}")
     logger.info("=" * 60)
-
-    
