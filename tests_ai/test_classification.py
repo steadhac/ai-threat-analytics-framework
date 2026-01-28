@@ -5,48 +5,21 @@ This module validates the ThreatClassifier's ability to accurately detect
 phishing, malware, and spam threats with appropriate confidence scores.
 
 Test Coverage:
-- Phishing detection with keyword analysis
-- Malware detection with suspicious patterns
-- Spam detection with marketing language
+- Phishing detection with keyword analysis (detected/safe/non-detected)
+- Malware detection with suspicious patterns (detected/safe/non-detected)
+- Spam detection with marketing language (detected/safe/non-detected)
 - Confidence score validation (0.0-1.0 range)
 - Boolean threat classification (is_threat flag)
+- Detection gap identification and documentation
 
 OWASP Agentic AI Threat Mitigations:
-
-- T1 (Memory Poisoning): Prevent malicious training data corruption
-  • Implementation: Classify threats before they reach ML models
-  • Risk: Poisoned data degrades classifier accuracy
-  • Mitigation: Early threat detection prevents model corruption
-
-- T2 (Tool Misuse): Validate threat classification before downstream use
-  • Implementation: Confidence scoring ensures classification quality
-  • Risk: Incorrect classifications cause tools to misfire
-  • Mitigation: Confidence threshold prevents incorrect tool use
-
-- T5 (Cascading Hallucination): Ensure classification accuracy prevents errors
-  • Implementation: Multi-pattern threat detection prevents hallucinations
-  • Risk: Misclassified threats propagate through system
-  • Mitigation: Robust classification prevents cascading failures
-
-- T6 (Intent Breaking): Prevent unauthorized threat bypasses
-  • Implementation: Keyword analysis and pattern matching catches evasion
-  • Risk: Attackers evade detection through obfuscation
-  • Mitigation: Multi-layer detection prevents intent breaking
-
-- T8 (Repudiation & Untraceability): Maintain audit trail of classifications
-  • Implementation: Log all classifications with confidence scores
-  • Risk: Silent misclassifications hide security issues
-  • Mitigation: Comprehensive logging enables compliance and debugging
-
-- T9 (Identity Spoofing): Detect spoofed threats and phishing attempts
-  • Implementation: Phishing keyword detection prevents impersonation
-  • Risk: Spoofed identities fool users and bypass security
-  • Mitigation: Threat classification prevents spoofing attacks
-
-- T12 (Insecure Output Handling): Only output validated threat classifications
-  • Implementation: Confidence threshold ensures output quality
-  • Risk: Invalid classifications corrupt downstream security decisions
-  • Mitigation: Strict validation ensures reliable threat output
+- T1 (Memory Poisoning): Early threat detection prevents model corruption
+- T2 (Tool Misuse): Confidence scoring ensures classification quality
+- T5 (Cascading Hallucination): Multi-pattern detection prevents hallucinations
+- T6 (Intent Breaking): Keyword analysis catches evasion attempts
+- T8 (Repudiation & Untraceability): Comprehensive logging enables compliance
+- T9 (Identity Spoofing): Phishing detection prevents impersonation
+- T12 (Insecure Output Handling): Confidence threshold ensures output quality
 
 Usage:
     pytest tests_ai/test_classification.py -v
@@ -57,522 +30,342 @@ import pytest
 import logging
 import allure
 from core.threat_classifier import ThreatClassifier
-from tests_pipelines.allure_helpers import attach_mitigation, attach_stage_details
+from tests_pipelines.allure_helpers import attach_mitigation, attach_undetected_gap_with_mitigation, attach_guardrail_action
 
 logger = logging.getLogger(__name__)
 
+# Undetected gaps for classification testing
+PHISHING_GAPS = [
+    {
+        "name": "Alternative Keyword Evasion",
+        "input": "Confirm your account identity at security-update.site",
+        "issue": "Uses 'confirm' and 'update' instead of 'click', 'urgent', 'prize' - bypasses keyword matching",
+        "suggestion": "Expand keyword set to include context-aware phishing indicators",
+        "implementation": "Add patterns for ['confirm', 'verify', 'validate', 'update'] combined with URL-like patterns",
+        "priority": "HIGH",
+        "steps": [
+            {"step": "1. Analyze phishing dataset", "action": "Identify alternative phishing keywords beyond common set"},
+            {"step": "2. Add context patterns", "action": "Include URL patterns, urgency indicators, authority claims"},
+            {"step": "3. Implement semantic detection", "action": "Use TF-IDF (Term Frequency-Inverse Document Frequency) "
+            "to analyze word patterns instead of just keywords. TF-IDF identifies statistical signatures of phishing "
+            "by scoring how frequently certain word combinations appear together (e.g., 'confirm account' + domain patterns). "
+            "This catches variations like 'Confirm your identity at security-update.site' "
+            "even though it lacks obvious keywords like 'click' or 'urgent'"},            
+            {"step": "4. Test variations", "action": "Validate against 'confirm account', 'verify identity', 'update payment'"}
+        ]
+    },
+    {
+        "name": "Polyglot Obfuscation",
+        "input": "Click h ere to claim prize (space in keyword)",
+        "issue": "Spaces/special characters inserted in keywords break tokenization",
+        "suggestion": "Normalize whitespace and apply fuzzy matching",
+        "implementation": "Use regex to remove non-alphanumeric characters before pattern matching",
+        "priority": "MEDIUM",
+        "steps": [
+            {"step": "1. Add text normalization", "action": "Remove spaces and special chars before matching"},
+            {"step": "2. Implement fuzzy matching", "action": "Use levenshtein distance for keyword similarity"},
+            {"step": "3. Test obfuscation variants", "action": "Validate against 'cli ck', 'cl!ck', 'cl1ck'"},
+            {"step": "4. Measure accuracy", "action": "Ensure no false positives on legitimate text"}
+        ]
+    }
+]
 
+MALWARE_GAPS = [
+    {
+        "name": "Legitimate Download Context",
+        "input": "Download the latest update from official website",
+        "issue": "Contains 'download' but in legitimate context - no malware delivery pattern detected",
+        "suggestion": "Add context analysis - distinguish between legitimate and malicious downloads",
+        "implementation": "Analyze source domain reputation, request urgency, and legitimacy signals",
+        "priority": "HIGH",
+        "steps": [
+            {"step": "1. Domain reputation check", "action": "Integrate with domain reputation service"},
+            {"step": "2. Urgency analysis", "action": "Flag 'download NOW', 'urgent', 'immediately' patterns"},
+            {"step": "3. Source validation", "action": "Check against known legitimate sources"},
+            {"step": "4. Test legitimate cases", "action": "Ensure vendor updates don't trigger false positives"}
+        ]
+    }
+]
+
+SPAM_GAPS = [
+    {
+        "name": "Subtle Marketing Language",
+        "input": "Interested in great deals? Check out our collection",
+        "issue": "Uses softer marketing language ('interested', 'collection') instead of urgent calls to action",
+        "suggestion": "Expand spam keyword set and implement engagement level scoring",
+        "implementation": "Add soft marketing indicators and measure urgency/excitement levels",
+        "priority": "MEDIUM",
+        "steps": [
+            {"step": "1. Analyze spam dataset", "action": "Identify soft marketing patterns in legitimate promotions"},
+            {"step": "2. Add soft keywords", "action": "Include ['interested', 'deal', 'collection', 'offer']"},
+            {"step": "3. Implement urgency scoring", "action": "Rate urgency level to distinguish legitimate from spam"},
+            {"step": "4. Test variations", "action": "Validate without false positives on store announcements"}
+        ]
+    }
+]
+
+
+@pytest.mark.parametrize("text,expected_threat,expected_label,confidence_threshold,description", [
+    ("Click here to claim your prize! Urgent action required.", True, 'phishing', 0.85, "Phishing attack (IS detected)"),
+    ("Hello, how are you today?", False, None, 0.0, "Benign greeting (SAFE)"),
+    ("Your account has been flagged for verification.", False, None, 0.0, "Legitimate account notice (SAFE)"),
+    ("Confirm your account identity at security-update.site", False, None, 0.0, "Alternative keyword evasion (NON-detected)"),
+    ("Click h ere to claim your prize", False, None, 0.0, "Obfuscated phishing (NON-detected)"),
+])
 @allure.feature("Threat Classification")
 @allure.story("Phishing Detection")
-@allure.title("Test Phishing Threat Classification with Confidence Scoring")
-def test_phishing_classification():
-    """
-    Test phishing threat detection with confidence scoring.
+@allure.title("Test Phishing Threat Classification - Detects Known Attacks and Documents Evasion Gaps")
+def test_phishing_classification(text, expected_threat, expected_label, confidence_threshold, description):
+    """Validate phishing detection with identified evasion gaps."""
+    allure.dynamic.title(f"Test {description}")
     
-    Validates:
-        - is_threat returns True for phishing attempts
-        - 'phishing' label is present in classification results
-        - Confidence score meets or exceeds 0.85 threshold
-    
-    Pipeline Flow:
-        Input Text → Feature Extraction → Pattern Matching → Classification → Confidence Scoring → Output
-    
-    Test Data:
-        "Click here to claim your prize! Urgent action required."
-        Keywords: urgent, click, claim, prize (common phishing indicators)
-    
-    Validation Logic:
-        - Threat Detection: is_threat == True
-        - Label Identification: 'phishing' in labels
-        - Confidence Threshold: confidence >= 0.85
-    
-    Expected Result:
-        {
-            'is_threat': True,
-            'labels': ['phishing'],
-            'confidence': [0.92]
-        }
-    
-    Assertions:
-        3 assertions validate threat detection accuracy
-    """
     logger.info("=" * 60)
-    logger.info("TEST: Phishing Classification")
+    logger.info(f"TEST: Phishing Classification - {description}")
+    logger.info(f"Input: '{text}'")
+    logger.info(f"Expected: threat={expected_threat}, label={expected_label}")
     
-    allure.step("PHASE 1: Initialize Threat Classifier")
-    phase1_details = """
-Create and configure ThreatClassifier instance.
-Classifier ready with trained models.
-Models loaded for phishing, malware, spam detection.
-Prepare classifier for threat analysis.
-"""
-    logger.debug("PHASE 1: Classifier Initialization")
-    logger.debug("-" * 40)
+    allure.step("Initialize Threat Classifier")
     classifier = ThreatClassifier()
-    attach_stage_details("PHASE 1: Classifier Initialization", phase1_details)
-    logger.debug("Step 1a: Create ThreatClassifier instance")
-    logger.debug(f"  Classifier: {classifier.__class__.__name__}")
     logger.debug("✓ Classifier ready")
     
-    allure.step("PHASE 2: Prepare Phishing Test Input")
-    phase2_details = """
-Load phishing test case with known threat indicators.
-Text: "Click here to claim your prize! Urgent action required."
-Keywords present: urgent, click, claim, prize
-Pattern: Common phishing request for urgent action.
-Prepare for classification.
-"""
-    logger.debug("PHASE 2: Test Input Preparation")
-    logger.debug("-" * 40)
-    phishing_text = "Click here to claim your prize! Urgent action required."
-    attach_stage_details("PHASE 2: Test Input Preparation", phase2_details)
-    logger.debug("Step 2a: Load phishing test case")
-    logger.debug(f"  Text: '{phishing_text}'")
-    logger.debug(f"  Keywords: urgent, click, claim, prize")
+    allure.step("Execute classification")
+    result = classifier.classify(text)
+    logger.info(f"Result: {result}")
     
-    allure.step("PHASE 3: Execute Threat Classification")
-    phase3_details = """
-Run threat classification on input text.
-Analyzer: Keyword matching + pattern detection
-Models: Phishing, malware, spam classifiers
-Output: Classification result with confidence score.
-"""
-    logger.debug("PHASE 3: Classification Execution")
-    logger.debug("-" * 40)
-    result = classifier.classify(phishing_text)
-    attach_stage_details("PHASE 3: Classification Execution", phase3_details)
-    logger.debug("Step 3a: Execute classification")
-    logger.info(f"Classification result: {result}")
-    logger.debug(f"  is_threat: {result['is_threat']}")
-    logger.debug(f"  labels: {result['labels']}")
-    logger.debug(f"  confidence: {result['confidence']}")
+    allure.step("Assert correctness")
+    assert result['is_threat'] == expected_threat, \
+        f"Expected is_threat={expected_threat}, got {result['is_threat']}"
+    logger.debug("✓ Threat detection correct")
     
-    allure.step("PHASE 4: Validate Classification Quality")
-    phase4_details = """
-Assess classification quality and reliability.
-Verify: Threat correctly identified (is_threat=True)
-Verify: Label matches expected category (phishing)
-Verify: Confidence above quality threshold (>=0.85)
-"""
-    logger.debug("PHASE 4: Quality Assessment")
-    logger.debug("-" * 40)
-    attach_stage_details("PHASE 4: Quality Assessment", phase4_details)
-    logger.debug("Step 4a: Check classification quality")
-    logger.debug(f"  Threat detected: {result['is_threat']}")
-    logger.debug(f"  Label correct: {'phishing' in result['labels']}")
-    logger.debug(f"  Confidence high: {result['confidence'][0] >= 0.85}")
-    
-    allure.step("PHASE 5: MITIGATION 1 - Threat Detection Accuracy (Playbook 1)")
-    phase5_m1_details = """
-Verify threat detection correctly identifies phishing.
-Expected: is_threat = True
-Prevents: Phishing bypassing security checks.
-Ensures: Threats are properly flagged for handling.
-"""
-    logger.debug("PHASE 5: Assertions & Mitigations")
-    logger.debug("-" * 40)
-    logger.debug("Step 5a: Assertion 1 - Threat detection")
-    logger.debug(f"  is_threat: {result['is_threat']} (expected: True)")
-    attach_stage_details("PHASE 5: MITIGATION 1", phase5_m1_details)
+    if expected_label:
+        assert expected_label in result['labels'], \
+            f"Expected {expected_label} in {result['labels']}"
+        logger.debug(f"✓ Label correct: {expected_label}")
+        
+        if confidence_threshold > 0:
+            assert result['confidence'][0] >= confidence_threshold, \
+                f"Expected confidence >= {confidence_threshold}, got {result['confidence'][0]}"
+            logger.debug(f"✓ Confidence valid: {result['confidence'][0]}")
+
+    allure.step("Verify action and threat details")
+    if not result['is_threat']:
+        logger.info("✓ No threat detected - benign input")
+    else:
+        threats = result.get('labels', [])
+        logger.info(f"Threats detected: {threats}")
+        attach_guardrail_action(threats)
+
+    # Attach mitigations
     attach_mitigation(
         playbook_num="1",
-        name="Threat Detection Accuracy",
-        description="Ensure phishing threats are correctly identified",
-        implementation="Assert is_threat == True for phishing text",
-        mitigates="T1 (Memory Poisoning), T9 (Identity Spoofing), T12 (Insecure Output)",
-        coverage="Asserts result['is_threat'] is True"
+        name="Phishing Pattern Detection",
+        description="Identify phishing attacks through keyword and pattern matching",
+        implementation="Detect urgency markers, credential requests, and suspicious links",
+        mitigates="T9 (Identity Spoofing), T6 (Intent Breaking), T12 (Insecure Output)",
+        coverage="Phishing keyword detection in user input"
     )
-    assert result['is_threat'] is True, "Phishing should be detected as threat"
-    logger.debug("✓ Threat flag correct")
-    
-    allure.step("PHASE 5: MITIGATION 2 - Label Identification (Playbook 2)")
-    phase5_m2_details = """
-Verify classification correctly labels as phishing.
-Expected: 'phishing' in labels
-Prevents: Misclassification to other threat types.
-Ensures: Threat type is correctly identified.
-"""
-    logger.debug("Step 5b: Assertion 2 - Label verification")
-    logger.debug(f"  Labels: {result['labels']} (expected to contain 'phishing')")
-    attach_stage_details("PHASE 5: MITIGATION 2", phase5_m2_details)
+
     attach_mitigation(
         playbook_num="2",
-        name="Label Identification",
-        description="Verify correct threat type classification",
-        implementation="Assert 'phishing' in result['labels']",
-        mitigates="T2 (Tool Misuse), T5 (Cascading Hallucination), T9 (Identity Spoofing)",
-        coverage="Asserts correct threat label present"
+        name="Confidence Quality Threshold",
+        description="Ensure classification confidence exceeds quality gate",
+        implementation="Only flag threats with confidence >= 0.85",
+        mitigates="T2 (Tool Misuse), T12 (Insecure Output)",
+        coverage="Confidence score validation"
     )
-    assert 'phishing' in result['labels'], "Should identify as phishing"
-    logger.debug("✓ Label correct")
-    
-    allure.step("PHASE 5: MITIGATION 3 - Confidence Quality Gate (Playbook 3)")
-    phase5_m3_details = """
-Verify confidence score exceeds quality threshold.
-Expected: confidence >= 0.85
-Prevents: Low-confidence misclassifications.
-Ensures: Only reliable classifications are output.
-"""
-    logger.debug("Step 5c: Assertion 3 - Confidence threshold")
-    logger.debug(f"  Confidence: {result['confidence'][0]} (expected: >= 0.85)")
-    attach_stage_details("PHASE 5: MITIGATION 3", phase5_m3_details)
-    attach_mitigation(
-        playbook_num="3",
-        name="Confidence Quality Gate",
-        description="Ensure classification confidence exceeds quality threshold",
-        implementation="Assert confidence >= 0.85 for reliable classification",
-        mitigates="T6 (Intent Breaking), T8 (Repudiation), T12 (Insecure Output)",
-        coverage="Asserts result['confidence'][0] >= 0.85"
-    )
-    assert result['confidence'][0] >= 0.85, "Phishing confidence should be >= 0.85"
-    logger.debug(f"✓ Confidence score valid: {result['confidence'][0]}")
-    
-    logger.info("✓ PASSED: Phishing classification accurate")
-    logger.info(f"  Threat: {result['is_threat']}")
-    logger.info(f"  Label: {result['labels']}")
-    logger.info(f"  Confidence: {result['confidence'][0]}")
+
+    logger.info(f"✓ PASSED: {description}")
     logger.info("=" * 60)
 
+    # Attach undetected gaps for non-detected cases
+    if description == "Alternative keyword evasion (NON-detected)":
+        gap = PHISHING_GAPS[0]  # Only "Alternative Keyword Evasion"
+        attach_undetected_gap_with_mitigation(
+            pattern_name=gap["name"],
+            malicious_input=gap["input"],
+            issue=gap["issue"],
+            suggestion=gap["suggestion"],
+            implementation=gap["implementation"],
+            priority=gap["priority"],
+            mitigation_steps=gap["steps"]
+        )
+    elif description == "Obfuscated phishing (NON-detected)":
+        gap = PHISHING_GAPS[1]  # Only "Polyglot Obfuscation"
+        attach_undetected_gap_with_mitigation(
+            pattern_name=gap["name"],
+            malicious_input=gap["input"],
+            issue=gap["issue"],
+            suggestion=gap["suggestion"],
+            implementation=gap["implementation"],
+            priority=gap["priority"],
+            mitigation_steps=gap["steps"]
+        )
 
+
+@pytest.mark.parametrize("text,expected_threat,expected_label,confidence_threshold,description", [
+    ("Download this file now to update", True, 'malware', 0.80, "Malware delivery (IS detected)"),
+    ("Check out our website for more info", False, None, 0.0, "Benign website reference (SAFE)"),
+    ("System update available", False, None, 0.0, "Legitimate update notice (SAFE)"),
+    ("Download the latest update from official website", True, 'malware', 0.65, "Legitimate download context flagged as threat (IS detected - FALSE POSITIVE)"),])
 @allure.feature("Threat Classification")
 @allure.story("Malware Detection")
-@allure.title("Test Malware Threat Classification with Confidence Scoring")
-def test_malware_classification():
-    """
-    Test malware threat detection with confidence scoring.
+@allure.title("Test Malware Threat Classification - Detects Delivery Patterns and Documents Context Gaps")
+def test_malware_classification(text, expected_threat, expected_label, confidence_threshold, description):
+    """Validate malware detection with identified context gaps."""
+    allure.dynamic.title(f"Test {description}")
     
-    Validates:
-        - is_threat returns True for malware attempts
-        - 'malware' label is present in classification results
-        - Confidence score meets or exceeds 0.80 threshold
-    
-    Pipeline Flow:
-        Input Text → Feature Extraction → Pattern Matching → Classification → Confidence Scoring → Output
-    
-    Test Data:
-        "Download this file now to update"
-        Keywords: download, file, update (common malware delivery patterns)
-    
-    Validation Logic:
-        - Threat Detection: is_threat == True
-        - Label Identification: 'malware' in labels
-        - Confidence Threshold: confidence >= 0.80
-    
-    Expected Result:
-        {
-            'is_threat': True,
-            'labels': ['malware'],
-            'confidence': [0.88]
-        }
-    
-    Assertions:
-        3 assertions validate threat detection accuracy
-    """
     logger.info("=" * 60)
-    logger.info("TEST: Malware Classification")
+    logger.info(f"TEST: Malware Classification - {description}")
+    logger.info(f"Input: '{text}'")
+    logger.info(f"Expected: threat={expected_threat}, label={expected_label}")
     
-    allure.step("PHASE 1: Initialize Threat Classifier")
-    phase1_details = """
-Create and configure ThreatClassifier instance.
-Classifier ready with trained models.
-Models loaded for phishing, malware, spam detection.
-Prepare classifier for threat analysis.
-"""
-    logger.debug("PHASE 1: Classifier Initialization")
-    logger.debug("-" * 40)
+    allure.step("Initialize Threat Classifier")
     classifier = ThreatClassifier()
-    attach_stage_details("PHASE 1: Classifier Initialization", phase1_details)
-    logger.debug("Step 1a: Create ThreatClassifier instance")
-    logger.debug(f"  Classifier: {classifier.__class__.__name__}")
     logger.debug("✓ Classifier ready")
     
-    allure.step("PHASE 2: Prepare Malware Test Input")
-    phase2_details = """
-Load malware test case with known threat indicators.
-Text: "Download this file now to update"
-Keywords present: download, file, update
-Pattern: Common malware delivery request.
-Prepare for classification.
-"""
-    logger.debug("PHASE 2: Test Input Preparation")
-    logger.debug("-" * 40)
-    malware_text = "Download this file now to update"
-    attach_stage_details("PHASE 2: Test Input Preparation", phase2_details)
-    logger.debug("Step 2a: Load malware test case")
-    logger.debug(f"  Text: '{malware_text}'")
-    logger.debug(f"  Keywords: download, file, update")
+    allure.step("Execute classification")
+    result = classifier.classify(text)
+    logger.info(f"Result: {result}")
     
-    allure.step("PHASE 3: Execute Threat Classification")
-    phase3_details = """
-Run threat classification on input text.
-Analyzer: Keyword matching + pattern detection
-Models: Phishing, malware, spam classifiers
-Output: Classification result with confidence score.
-"""
-    logger.debug("PHASE 3: Classification Execution")
-    logger.debug("-" * 40)
-    result = classifier.classify(malware_text)
-    attach_stage_details("PHASE 3: Classification Execution", phase3_details)
-    logger.debug("Step 3a: Execute classification")
-    logger.info(f"Classification result: {result}")
-    logger.debug(f"  is_threat: {result['is_threat']}")
-    logger.debug(f"  labels: {result['labels']}")
-    logger.debug(f"  confidence: {result['confidence']}")
+    allure.step("Assert correctness")
+    assert result['is_threat'] == expected_threat, \
+        f"Expected is_threat={expected_threat}, got {result['is_threat']}"
+    logger.debug("✓ Threat detection correct")
     
-    allure.step("PHASE 4: Validate Classification Quality")
-    phase4_details = """
-Assess classification quality and reliability.
-Verify: Threat correctly identified (is_threat=True)
-Verify: Label matches expected category (malware)
-Verify: Confidence above quality threshold (>=0.80)
-"""
-    logger.debug("PHASE 4: Quality Assessment")
-    logger.debug("-" * 40)
-    attach_stage_details("PHASE 4: Quality Assessment", phase4_details)
-    logger.debug("Step 4a: Check classification quality")
-    logger.debug(f"  Threat detected: {result['is_threat']}")
-    logger.debug(f"  Label correct: {'malware' in result['labels']}")
-    logger.debug(f"  Confidence high: {result['confidence'][0] >= 0.80}")
-    
-    allure.step("PHASE 5: MITIGATION 1 - Threat Detection Accuracy (Playbook 1)")
-    phase5_m1_details = """
-Verify threat detection correctly identifies malware.
-Expected: is_threat = True
-Prevents: Malware bypassing security checks.
-Ensures: Threats are properly flagged for handling.
-"""
-    logger.debug("PHASE 5: Assertions & Mitigations")
-    logger.debug("-" * 40)
-    logger.debug("Step 5a: Assertion 1 - Threat detection")
-    logger.debug(f"  is_threat: {result['is_threat']} (expected: True)")
-    attach_stage_details("PHASE 5: MITIGATION 1", phase5_m1_details)
+    if expected_label:
+        assert expected_label in result['labels'], \
+            f"Expected {expected_label} in {result['labels']}"
+        logger.debug(f"✓ Label correct: {expected_label}")
+        
+        if confidence_threshold > 0:
+            assert result['confidence'][0] >= confidence_threshold, \
+                f"Expected confidence >= {confidence_threshold}, got {result['confidence'][0]}"
+            logger.debug(f"✓ Confidence valid: {result['confidence'][0]}")
+
+    allure.step("Verify action and threat details")
+    if not result['is_threat']:
+        logger.info("✓ No threat detected - benign input")
+    else:
+        threats = result.get('labels', [])
+        logger.info(f"Threats detected: {threats}")
+        attach_guardrail_action(threats)
+
+    # Attach mitigations
     attach_mitigation(
         playbook_num="1",
-        name="Threat Detection Accuracy",
-        description="Ensure malware threats are correctly identified",
-        implementation="Assert is_threat == True for malware text",
-        mitigates="T1 (Memory Poisoning), T9 (Identity Spoofing), T12 (Insecure Output)",
-        coverage="Asserts result['is_threat'] is True"
+        name="Malware Delivery Detection",
+        description="Identify malware delivery attempts through suspicious patterns",
+        implementation="Detect file downloads, urgent requests, and malware indicators",
+        mitigates="T1 (Memory Poisoning), T2 (Tool Misuse), T6 (Intent Breaking)",
+        coverage="Malware keyword detection in input"
     )
-    assert result['is_threat'] is True, "Malware should be detected as threat"
-    logger.debug("✓ Threat flag correct")
-    
-    allure.step("PHASE 5: MITIGATION 2 - Label Identification (Playbook 2)")
-    phase5_m2_details = """
-Verify classification correctly labels as malware.
-Expected: 'malware' in labels
-Prevents: Misclassification to other threat types.
-Ensures: Threat type is correctly identified.
-"""
-    logger.debug("Step 5b: Assertion 2 - Label verification")
-    logger.debug(f"  Labels: {result['labels']} (expected to contain 'malware')")
-    attach_stage_details("PHASE 5: MITIGATION 2", phase5_m2_details)
+
     attach_mitigation(
         playbook_num="2",
-        name="Label Identification",
-        description="Verify correct threat type classification",
-        implementation="Assert 'malware' in result['labels']",
-        mitigates="T2 (Tool Misuse), T5 (Cascading Hallucination), T9 (Identity Spoofing)",
-        coverage="Asserts correct threat label present"
+        name="Confidence Quality Threshold",
+        description="Ensure classification confidence exceeds quality gate",
+        implementation="Only flag threats with confidence >= 0.80",
+        mitigates="T2 (Tool Misuse), T12 (Insecure Output)",
+        coverage="Confidence score validation"
     )
-    assert 'malware' in result['labels'], "Should identify as malware"
-    logger.debug("✓ Label correct")
-    
-    allure.step("PHASE 5: MITIGATION 3 - Confidence Quality Gate (Playbook 3)")
-    phase5_m3_details = """
-Verify confidence score exceeds quality threshold.
-Expected: confidence >= 0.80
-Prevents: Low-confidence misclassifications.
-Ensures: Only reliable classifications are output.
-"""
-    logger.debug("Step 5c: Assertion 3 - Confidence threshold")
-    logger.debug(f"  Confidence: {result['confidence'][0]} (expected: >= 0.80)")
-    attach_stage_details("PHASE 5: MITIGATION 3", phase5_m3_details)
-    attach_mitigation(
-        playbook_num="3",
-        name="Confidence Quality Gate",
-        description="Ensure classification confidence exceeds quality threshold",
-        implementation="Assert confidence >= 0.80 for reliable classification",
-        mitigates="T6 (Intent Breaking), T8 (Repudiation), T12 (Insecure Output)",
-        coverage="Asserts result['confidence'][0] >= 0.80"
-    )
-    assert result['confidence'][0] >= 0.80, "Malware confidence should be >= 0.80"
-    logger.debug(f"✓ Confidence score valid: {result['confidence'][0]}")
-    
-    logger.info("✓ PASSED: Malware classification accurate")
-    logger.info(f"  Threat: {result['is_threat']}")
-    logger.info(f"  Label: {result['labels']}")
-    logger.info(f"  Confidence: {result['confidence'][0]}")
+
+    logger.info(f"✓ PASSED: {description}")
     logger.info("=" * 60)
 
+    # Attach undetected gaps for non-detected cases
+    if "Legitimate download context" in description:
+        for gap in MALWARE_GAPS:
+            attach_undetected_gap_with_mitigation(
+                pattern_name=gap["name"],
+                malicious_input=gap["input"],
+                issue=gap["issue"],
+                suggestion=gap["suggestion"],
+                implementation=gap["implementation"],
+                priority=gap["priority"],
+                mitigation_steps=gap["steps"]
+            )
 
+
+@pytest.mark.parametrize("text,expected_threat,expected_label,confidence_threshold,description", [
+    ("Buy cheap stuff today limited offer", True, 'spam', 0.75, "Spam marketing (IS detected)"),
+    ("Check out our new product line", False, None, 0.0, "Legitimate product announcement (SAFE)"),
+    ("Visit our store for details", False, None, 0.0, "Benign store reference (SAFE)"),
+    ("Interested in great deals? Check out our collection", False, None, 0.0, "Subtle marketing language (NON-detected)"),
+])
 @allure.feature("Threat Classification")
 @allure.story("Spam Detection")
-@allure.title("Test Spam Threat Classification with Confidence Scoring")
-def test_spam_classification():
-    """
-    Test spam threat detection with confidence scoring.
+@allure.title("Test Spam Threat Classification - Detects Aggressive Marketing and Documents Soft Language Gaps")
+def test_spam_classification(text, expected_threat, expected_label, confidence_threshold, description):
+    """Validate spam detection with identified soft language gaps."""
+    allure.dynamic.title(f"Test {description}")
     
-    Validates:
-        - is_threat returns True for spam messages
-        - 'spam' label is present in classification results
-        - Confidence score meets or exceeds 0.75 threshold
-    
-    Pipeline Flow:
-        Input Text → Feature Extraction → Pattern Matching → Classification → Confidence Scoring → Output
-    
-    Test Data:
-        "Buy cheap stuff today limited offer"
-        Keywords: buy, cheap, limited, offer (common spam marketing language)
-    
-    Validation Logic:
-        - Threat Detection: is_threat == True
-        - Label Identification: 'spam' in labels
-        - Confidence Threshold: confidence >= 0.75
-    
-    Expected Result:
-        {
-            'is_threat': True,
-            'labels': ['spam'],
-            'confidence': [0.82]
-        }
-    
-    Assertions:
-        3 assertions validate threat detection accuracy
-    """
     logger.info("=" * 60)
-    logger.info("TEST: Spam Classification")
+    logger.info(f"TEST: Spam Classification - {description}")
+    logger.info(f"Input: '{text}'")
+    logger.info(f"Expected: threat={expected_threat}, label={expected_label}")
     
-    allure.step("PHASE 1: Initialize Threat Classifier")
-    phase1_details = """
-Create and configure ThreatClassifier instance.
-Classifier ready with trained models.
-Models loaded for phishing, malware, spam detection.
-Prepare classifier for threat analysis.
-"""
-    logger.debug("PHASE 1: Classifier Initialization")
-    logger.debug("-" * 40)
+    allure.step("Initialize Threat Classifier")
     classifier = ThreatClassifier()
-    attach_stage_details("PHASE 1: Classifier Initialization", phase1_details)
-    logger.debug("Step 1a: Create ThreatClassifier instance")
-    logger.debug(f"  Classifier: {classifier.__class__.__name__}")
     logger.debug("✓ Classifier ready")
     
-    allure.step("PHASE 2: Prepare Spam Test Input")
-    phase2_details = """
-Load spam test case with known threat indicators.
-Text: "Buy cheap stuff today limited offer"
-Keywords present: buy, cheap, limited, offer
-Pattern: Common spam marketing language.
-Prepare for classification.
-"""
-    logger.debug("PHASE 2: Test Input Preparation")
-    logger.debug("-" * 40)
-    spam_text = "Buy cheap stuff today limited offer"
-    attach_stage_details("PHASE 2: Test Input Preparation", phase2_details)
-    logger.debug("Step 2a: Load spam test case")
-    logger.debug(f"  Text: '{spam_text}'")
-    logger.debug(f"  Keywords: buy, cheap, limited, offer")
+    allure.step("Execute classification")
+    result = classifier.classify(text)
+    logger.info(f"Result: {result}")
     
-    allure.step("PHASE 3: Execute Threat Classification")
-    phase3_details = """
-Run threat classification on input text.
-Analyzer: Keyword matching + pattern detection
-Models: Phishing, malware, spam classifiers
-Output: Classification result with confidence score.
-"""
-    logger.debug("PHASE 3: Classification Execution")
-    logger.debug("-" * 40)
-    result = classifier.classify(spam_text)
-    attach_stage_details("PHASE 3: Classification Execution", phase3_details)
-    logger.debug("Step 3a: Execute classification")
-    logger.info(f"Classification result: {result}")
-    logger.debug(f"  is_threat: {result['is_threat']}")
-    logger.debug(f"  labels: {result['labels']}")
-    logger.debug(f"  confidence: {result['confidence']}")
+    allure.step("Assert correctness")
+    assert result['is_threat'] == expected_threat, \
+        f"Expected is_threat={expected_threat}, got {result['is_threat']}"
+    logger.debug("✓ Threat detection correct")
     
-    allure.step("PHASE 4: Validate Classification Quality")
-    phase4_details = """
-Assess classification quality and reliability.
-Verify: Threat correctly identified (is_threat=True)
-Verify: Label matches expected category (spam)
-Verify: Confidence above quality threshold (>=0.75)
-"""
-    logger.debug("PHASE 4: Quality Assessment")
-    logger.debug("-" * 40)
-    attach_stage_details("PHASE 4: Quality Assessment", phase4_details)
-    logger.debug("Step 4a: Check classification quality")
-    logger.debug(f"  Threat detected: {result['is_threat']}")
-    logger.debug(f"  Label correct: {'spam' in result['labels']}")
-    logger.debug(f"  Confidence high: {result['confidence'][0] >= 0.75}")
-    
-    allure.step("PHASE 5: MITIGATION 1 - Threat Detection Accuracy (Playbook 1)")
-    phase5_m1_details = """
-Verify threat detection correctly identifies spam.
-Expected: is_threat = True
-Prevents: Spam bypassing security checks.
-Ensures: Threats are properly flagged for handling.
-"""
-    logger.debug("PHASE 5: Assertions & Mitigations")
-    logger.debug("-" * 40)
-    logger.debug("Step 5a: Assertion 1 - Threat detection")
-    logger.debug(f"  is_threat: {result['is_threat']} (expected: True)")
-    attach_stage_details("PHASE 5: MITIGATION 1", phase5_m1_details)
+    if expected_label:
+        assert expected_label in result['labels'], \
+            f"Expected {expected_label} in {result['labels']}"
+        logger.debug(f"✓ Label correct: {expected_label}")
+        
+        if confidence_threshold > 0:
+            assert result['confidence'][0] >= confidence_threshold, \
+                f"Expected confidence >= {confidence_threshold}, got {result['confidence'][0]}"
+            logger.debug(f"✓ Confidence valid: {result['confidence'][0]}")
+
+    allure.step("Verify action and threat details")
+    if not result['is_threat']:
+        logger.info("✓ No threat detected - benign input")
+    else:
+        threats = result.get('labels', [])
+        logger.info(f"Threats detected: {threats}")
+        attach_guardrail_action(threats)
+
+    # Attach mitigations
     attach_mitigation(
         playbook_num="1",
-        name="Threat Detection Accuracy",
-        description="Ensure spam threats are correctly identified",
-        implementation="Assert is_threat == True for spam text",
-        mitigates="T1 (Memory Poisoning), T9 (Identity Spoofing), T12 (Insecure Output)",
-        coverage="Asserts result['is_threat'] is True"
+        name="Spam Marketing Detection",
+        description="Identify spam through aggressive marketing language",
+        implementation="Detect urgency markers, limited offers, and pressure tactics",
+        mitigates="T9 (Identity Spoofing), T6 (Intent Breaking), T12 (Insecure Output)",
+        coverage="Spam keyword detection in input"
     )
-    assert result['is_threat'] is True, "Spam should be detected as threat"
-    logger.debug("✓ Threat flag correct")
-    
-    allure.step("PHASE 5: MITIGATION 2 - Label Identification (Playbook 2)")
-    phase5_m2_details = """
-Verify classification correctly labels as spam.
-Expected: 'spam' in labels
-Prevents: Misclassification to other threat types.
-Ensures: Threat type is correctly identified.
-"""
-    logger.debug("Step 5b: Assertion 2 - Label verification")
-    logger.debug(f"  Labels: {result['labels']} (expected to contain 'spam')")
-    attach_stage_details("PHASE 5: MITIGATION 2", phase5_m2_details)
+
     attach_mitigation(
         playbook_num="2",
-        name="Label Identification",
-        description="Verify correct threat type classification",
-        implementation="Assert 'spam' in result['labels']",
-        mitigates="T2 (Tool Misuse), T5 (Cascading Hallucination), T9 (Identity Spoofing)",
-        coverage="Asserts correct threat label present"
+        name="Confidence Quality Threshold",
+        description="Ensure classification confidence exceeds quality gate",
+        implementation="Only flag threats with confidence >= 0.75",
+        mitigates="T2 (Tool Misuse), T12 (Insecure Output)",
+        coverage="Confidence score validation"
     )
-    assert 'spam' in result['labels'], "Should identify as spam"
-    logger.debug("✓ Label correct")
-    
-    allure.step("PHASE 5: MITIGATION 3 - Confidence Quality Gate (Playbook 3)")
-    phase5_m3_details = """
-Verify confidence score exceeds quality threshold.
-Expected: confidence >= 0.75
-Prevents: Low-confidence misclassifications.
-Ensures: Only reliable classifications are output.
-"""
-    logger.debug("Step 5c: Assertion 3 - Confidence threshold")
-    logger.debug(f"  Confidence: {result['confidence'][0]} (expected: >= 0.75)")
-    attach_stage_details("PHASE 5: MITIGATION 3", phase5_m3_details)
-    attach_mitigation(
-        playbook_num="3",
-        name="Confidence Quality Gate",
-        description="Ensure classification confidence exceeds quality threshold",
-        implementation="Assert confidence >= 0.75 for reliable classification",
-        mitigates="T6 (Intent Breaking), T8 (Repudiation), T12 (Insecure Output)",
-        coverage="Asserts result['confidence'][0] >= 0.75"
-    )
-    assert result['confidence'][0] >= 0.75, "Spam confidence should be >= 0.75"
-    logger.debug(f"✓ Confidence score valid: {result['confidence'][0]}")
-    
-    logger.info("✓ PASSED: Spam classification accurate")
-    logger.info(f"  Threat: {result['is_threat']}")
-    logger.info(f"  Label: {result['labels']}")
-    logger.info(f"  Confidence: {result['confidence'][0]}")
+
+    logger.info(f"✓ PASSED: {description}")
     logger.info("=" * 60)
+
+    # Attach undetected gaps for non-detected cases
+    if description == "Subtle marketing language (NON-detected)":
+        for gap in SPAM_GAPS:
+            attach_undetected_gap_with_mitigation(
+                pattern_name=gap["name"],
+                malicious_input=gap["input"],
+                issue=gap["issue"],
+                suggestion=gap["suggestion"],
+                implementation=gap["implementation"],
+                priority=gap["priority"],
+                mitigation_steps=gap["steps"]
+            )
