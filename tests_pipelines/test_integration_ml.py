@@ -160,7 +160,7 @@ def take_threat_action(threat_text, features, threat_level=None):
 
 @allure.feature("ML Pipeline")
 @allure.story("End-to-End Integration")
-@allure.title("(GOOD) Test ML Pipeline Integration - Multi-Level Threat Response")
+@allure.title("Test ML Pipeline Integration - Multi-Level Threat Response")
 def test_ml_pipeline_integration():
     """
     Test end-to-end ML pipeline with threat level assessment and multi-level response.
@@ -168,7 +168,7 @@ def test_ml_pipeline_integration():
     Test Data: 'Click here to claim prize' → HIGH threat → ALERT action
     """
     logger.info("=" * 60)
-    logger.info("TEST: (GOOD) End-to-End ML Pipeline with Threat Response")
+    logger.info("TEST: End-to-End ML Pipeline with Threat Response")
     
     allure.step("STAGE 0: Vulnerabilities Mitigated")
     vulnerabilities_mitigated = """
@@ -325,9 +325,9 @@ Blocked: {action['blocked']}
 
 
 @pytest.mark.parametrize("threat_text,expected_count,expected_threat,expected_action,scenario_label", [
-    ("Click here to claim prize", 5, True, "ALERT", "(GOOD) Phishing - Is Detected - ALERT"),
-    ("Check out our products", 4, False, "NONE", "(GOOD) Benign - Safe"),
-    ("Download this file immediately", 4, True, "BLOCK", "(GOOD) Malware - Is Detected - BLOCK"),
+    ("Click here to claim prize", 5, True, "ALERT", "Phishing - Is Detected - ALERT"),
+    ("Check out our products", 4, False, "NONE", "Benign - Safe"),
+    ("Download this file immediately", 4, True, "BLOCK", "Malware - Is Detected - BLOCK"),
     ("", 0, False, "NONE", "(GAP) Empty Text - Non_Detected"),
 ])
 @allure.feature("ML Pipeline")
@@ -338,30 +338,30 @@ def test_ml_pipeline_multiple_scenarios(threat_text, expected_count, expected_th
     Test ML pipeline across multiple scenarios with multi-level threat response.
     
     Scenarios:
-    - Phishing (GOOD): Click pattern → HIGH threat → ALERT
-    - Benign (GOOD): Safe content → SAFE → NO ACTION
-    - Malware (GOOD): Download+immediately → CRITICAL → BLOCK
+    - Phishing : Click pattern → HIGH threat → ALERT
+    - Benign : Safe content → SAFE → NO ACTION
+    - Malware : Download+immediately → CRITICAL → BLOCK
     - Empty Text (GAP): Edge case → SAFE → NO ACTION
     """
     logger.info(f"TEST: {scenario_label}")
     
     allure.step("STAGE 0: Scenario Vulnerabilities")
     scenario_vulns = {
-        "(GOOD) Phishing - Is Detected - ALERT": """
+        "Phishing - Is Detected - ALERT": """
 Vulnerabilities Tested:
 🛡️ T3 - Jailbreak Detection (identify phishing attempts)
 🛡️ T7 - Implicit Responsibility (alert and escalate)
 🛡️ T8 - Repudiation (create audit trail)
 🛡️ T10 - Prevent Social Engineering (block click-based attacks)
 """,
-        "(GOOD) Benign - Safe": """
+        "Benign - Safe": """
 Vulnerabilities Tested:
 🛡️ T1 - Memory Poisoning (safe inputs don't trigger false positives)
 🛡️ T2 - Tool Misuse (correct classification of benign content)
 🛡️ T5 - Cascading Hallucination (no error propagation)
 🛡️ T8 - Repudiation (log all decisions for audit)
 """,
-        "(GOOD) Malware - Is Detected - BLOCK": """
+        "Malware - Is Detected - BLOCK": """
 Vulnerabilities Tested:
 🛡️ T3 - Jailbreak Prevention (detect malware patterns)
 🛡️ T4 - Resource Overload (prevent DoS via malware)
