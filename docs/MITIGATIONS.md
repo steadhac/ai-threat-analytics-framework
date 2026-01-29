@@ -46,7 +46,8 @@ Attack Vector:
 - Inconsistent feature types (int vs float)
 - Missing required features in output
 - Feature values don't match input characteristics
-- Impact: False predictions, unreliable threat classifications, downstream errors
+
+Impact: False predictions, unreliable threat classifications, downstream errors
 
 Mitigation Strategy: Data integrity checks validate feature consistency
 
