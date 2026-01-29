@@ -27,8 +27,7 @@ This framework showcases practical implementations of AI security concepts inclu
 - ✅ **Security-Focused** - Demonstrates AI safety techniques
 ---
 ## 🏗️ Architecture
-```mermaid
-## 🏗️ Architecture
+
 ```mermaid
 graph TB
     subgraph Input["Input Layer"]
