@@ -28,6 +28,8 @@ This framework showcases practical implementations of AI security concepts inclu
 ---
 ## 🏗️ Architecture
 ```mermaid
+## 🏗️ Architecture
+```mermaid
 graph TB
     subgraph Input["Input Layer"]
         API["API/User Input"]
@@ -43,9 +45,16 @@ graph TB
         
         AF["autofill_service.py<br/>Email Suggestions"]
         TC["threat_classifier.py<br/>Threat Detection"]
+        TLA["threat_level_assessment.py<br/>Severity Classification"]
         GR["guardrails.py<br/>LLM Safety"]
         Sum["summarizer.py<br/>Text Summary"]
         AD["anomaly_utils.py<br/>Z-Score Analysis"]
+    end
+
+    subgraph ThreatResponse["Multi-Level Threat Response"]
+        Block["🚫 BLOCKING<br/>CRITICAL (95%+)<br/>Preventive Action"]
+        Alert["⚠️ ALERTING<br/>HIGH/MEDIUM<br/>Escalate Review"]
+        Log["📋 LOGGING<br/>LOW Threats<br/>Monitoring"]
     end
 
     subgraph Testing["Test Layer"]
@@ -55,17 +64,23 @@ graph TB
             TAEdge["Edge Case Tests<br/>Whitespace, Case,<br/>Special Characters,<br/>Encoding (18 cases)"]
         end
         
-        subgraph PipelineTests["Pipeline Tests (24 cases)"]
+        subgraph PipelineTests["Pipeline Tests (24+ cases)"]
             TPUnit["Unit Tests<br/>Anomaly Detection,<br/>Data Validation"]
             TPEdge["Edge Case Tests<br/>Threshold Sensitivity,<br/>Scale Independence"]
-            TPInteg["Integration Tests<br/>ML Pipeline Flow"]
+            TPInteg["Integration Tests<br/>ML Pipeline Flow<br/>with Threat Response"]
+        end
+        
+        subgraph VulnMitigation["Vulnerability Coverage"]
+            T1T4["T1-T4: Input Validation<br/>Resource Protection"]
+            T5T8["T5-T8: Data Integrity<br/>Audit Trail"]
+            T9T12["T9-T12: Execution Control<br/>Threat Prevention"]
         end
     end
 
     subgraph Output["Output Layer"]
         Results["Test Results"]
-        Reports["HTML Reports<br/>Allure Reports"]
-        Logs["Logs & Metrics"]
+        Reports["HTML Reports<br/>Allure Reports<br/>Vulnerability Maps"]
+        Logs["Logs & Metrics<br/>Threat Actions"]
     end
 
     API --> AC
@@ -76,9 +91,14 @@ graph TB
     
     AC --> AF
     AC --> TC
+    TC --> TLA
     AC --> GR
     AC --> Sum
     AC --> AD
+    
+    TLA --> Block
+    TLA --> Alert
+    TLA --> Log
     
     AF --> TAUnit
     TC --> TAUnit
@@ -96,16 +116,81 @@ graph TB
     TPEdge --> Results
     TPInteg --> Results
     
+    Block --> TPInteg
+    Alert --> TPInteg
+    Log --> TPInteg
+    
     Results --> Reports
+    Reports --> VulnMitigation
     Logger -.-> Logs
-    Metrics -.-> Logs
-
+    ThreatResponse -.-> Logs
     style Input fill:#e1f5e1
     style Core fill:#e3f2fd
     style Testing fill:#fff3e0
     style AITests fill:#ffe0b2
     style PipelineTests fill:#ffe0b2
     style Output fill:#f3e5f5
+```
+## 🛡️ Threat Response Strategy
+``` mermaid
+graph LR
+    Threat["Threat Detected"]
+    
+    Threat --> TLA["Threat Level<br/>Assessment"]
+    
+    TLA --> CRIT["CRITICAL?<br/>Confidence >90%"]
+    TLA --> HIGH["HIGH/MEDIUM?<br/>Confidence 50-90%"]
+    TLA --> LOW["LOW?<br/>Confidence <50%"]
+    
+    CRIT -->|YES| BLOCK["🚫 BLOCK<br/>Immediate Prevention<br/>- Block action<br/>- Escalate<br/>- Log alert"]
+    
+    HIGH -->|YES| ALERT["⚠️ ALERT<br/>Escalate for Review<br/>- Generate alert ID<br/>- Escalate to team<br/>- Create incident"]
+    
+    LOW -->|YES| LOGONLY["📋 LOG<br/>Monitor & Analyze<br/>- Write to audit log<br/>- Tag for batch analysis<br/>- Support ML retraining"]
+    
+    TLA -->|SAFE| NONE["✅ NO ACTION<br/>- Continue processing<br/>- Log normally"]
+    
+    BLOCK --> VulnMit1["T3: Jailbreak Prevention<br/>T10: Malware Prevention<br/>T11: Code Injection Prevention<br/>T12: Advanced Threats"]
+    ALERT --> VulnMit2["T3: Jailbreak Detection<br/>T7: Accountability<br/>T8: Audit Trail"]
+    LOGONLY --> VulnMit3["T1-T4: Input Protection<br/>T5: Error Prevention<br/>T6: Execution Isolation"]
+    NONE --> VulnMit4["T1-T12: All Mitigations<br/>No false positives"]
+```
+## 🔒 Vulnerability Coverage Matrix
+``` mermaid
+graph TB
+    subgraph T1T4["Input & Resource Protection"]
+        T1["T1: Memory Poisoning<br/>word_count > 0"]
+        T4["T4: Resource Overload<br/>Input validation"]
+        T11["T11: Code Injection<br/>Execution control"]
+    end
+    
+    subgraph T5T8["Data Integrity & Audit"]
+        T2["T2: Tool Misuse<br/>Feature consistency"]
+        T5["T5: Cascading Errors<br/>Feature isolation"]
+        T6["T6: Intent Breaking<br/>Prediction isolation"]
+        T8["T8: Repudiation<br/>Audit logging"]
+    end
+    
+    subgraph T9T12["Execution & Threat Prevention"]
+        T3["T3: Jailbreak<br/>Threat assessment"]
+        T7["T7: Accountability<br/>Action logging"]
+        T9["T9: Identity Spoofing<br/>Execution isolation"]
+        T10["T10: Malware<br/>BLOCK action"]
+        T12["T12: Advanced Attacks<br/>Multi-level response"]
+    end
+    
+    style T1 fill:#e1f5ff
+    style T4 fill:#e1f5ff
+    style T11 fill:#e1f5ff
+    style T2 fill:#f3e5f5
+    style T5 fill:#f3e5f5
+    style T6 fill:#f3e5f5
+    style T8 fill:#f3e5f5
+    style T3 fill:#fff3e0
+    style T7 fill:#fff3e0
+    style T9 fill:#fff3e0
+    style T10 fill:#fff3e0
+    style T12 fill:#fff3e0
 ```
 ## 🚀 Features
 
@@ -147,6 +232,9 @@ Use this for normal test execution. It's pre-configured via [setup.cfg](setup.cf
 ```bash
 # Run all tests
 python run_tests.py
+
+# Clear cache, run all tests, generate and serve Allure report
+pytest --cache-clear && pytest tests_ai/ tests_pipelines/ -v --alluredir=allure-results && allure serve allure-results
 
 # Run specific test suite
 python run_tests.py --suite ai
