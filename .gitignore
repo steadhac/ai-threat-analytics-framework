@@ -75,3 +75,4 @@ secrets.yaml
 credentials.json
 *.key
 *.pem
+allure_results/

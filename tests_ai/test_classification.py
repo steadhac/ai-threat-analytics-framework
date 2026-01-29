@@ -106,11 +106,11 @@ SPAM_GAPS = [
 
 
 @pytest.mark.parametrize("text,expected_threat,expected_label,confidence_threshold,description", [
-    ("Click here to claim your prize! Urgent action required.", True, 'phishing', 0.85, "Phishing attack (IS detected)"),
-    ("Hello, how are you today?", False, None, 0.0, "Benign greeting (SAFE)"),
-    ("Your account has been flagged for verification.", False, None, 0.0, "Legitimate account notice (SAFE)"),
-    ("Confirm your account identity at security-update.site", False, None, 0.0, "Alternative keyword evasion (NON-detected)"),
-    ("Click h ere to claim your prize", False, None, 0.0, "Obfuscated phishing (NON-detected)"),
+    ("Click here to claim your prize! Urgent action required.", True, 'phishing', 0.85, "(GOOD) Phishing attack - Is_Detected"),
+    ("Hello, how are you today?", False, None, 0.0, "(GOOD) Benign greeting - Safe"),
+    ("Your account has been flagged for verification.", False, None, 0.0, "(GOOD) Legitimate account notice - Safe"),
+    ("Confirm your account identity at security-update.site", False, None, 0.0, "(GAP) Alternative keyword evasion - Non_Detected"),
+    ("Click h ere to claim your prize", False, None, 0.0, "(GAP) Obfuscated phishing - Non_Detected"),
 ])
 @allure.feature("Threat Classification")
 @allure.story("Phishing Detection")
@@ -178,7 +178,7 @@ def test_phishing_classification(text, expected_threat, expected_label, confiden
     logger.info("=" * 60)
 
     # Attach undetected gaps for non-detected cases
-    if description == "Alternative keyword evasion (NON-detected)":
+    if description == "(GAP) Alternative keyword evasion - Non_Detected":
         gap = PHISHING_GAPS[0]  # Only "Alternative Keyword Evasion"
         attach_undetected_gap_with_mitigation(
             pattern_name=gap["name"],
@@ -189,7 +189,7 @@ def test_phishing_classification(text, expected_threat, expected_label, confiden
             priority=gap["priority"],
             mitigation_steps=gap["steps"]
         )
-    elif description == "Obfuscated phishing (NON-detected)":
+    elif description == "(GAP) Obfuscated phishing - Non_Detected":
         gap = PHISHING_GAPS[1]  # Only "Polyglot Obfuscation"
         attach_undetected_gap_with_mitigation(
             pattern_name=gap["name"],
@@ -203,9 +203,9 @@ def test_phishing_classification(text, expected_threat, expected_label, confiden
 
 
 @pytest.mark.parametrize("text,expected_threat,expected_label,confidence_threshold,description", [
-    ("Download this file now to update", True, 'malware', 0.80, "Malware delivery (IS detected)"),
-    ("Check out our website for more info", False, None, 0.0, "Benign website reference (SAFE)"),
-    ("System update available", False, None, 0.0, "Legitimate update notice (SAFE)"),
+    ("Download this file now to update", True, 'malware', 0.80, "(GOOD) Malware delivery - Is_Detected"),
+    ("Check out our website for more info", False, None, 0.0, "(GOOD) Benign website reference - Safe"),
+    ("System update available", False, None, 0.0, "(GOOD) Legitimate update notice - Safe"),
     ("Download the latest update from official website", True, 'malware', 0.65, "Legitimate download context flagged as threat (IS detected - FALSE POSITIVE)"),])
 @allure.feature("Threat Classification")
 @allure.story("Malware Detection")
@@ -287,10 +287,10 @@ def test_malware_classification(text, expected_threat, expected_label, confidenc
 
 
 @pytest.mark.parametrize("text,expected_threat,expected_label,confidence_threshold,description", [
-    ("Buy cheap stuff today limited offer", True, 'spam', 0.75, "Spam marketing (IS detected)"),
-    ("Check out our new product line", False, None, 0.0, "Legitimate product announcement (SAFE)"),
-    ("Visit our store for details", False, None, 0.0, "Benign store reference (SAFE)"),
-    ("Interested in great deals? Check out our collection", False, None, 0.0, "Subtle marketing language (NON-detected)"),
+    ("Buy cheap stuff today limited offer", True, 'spam', 0.75, "(GOOD) Spam marketing - Is_Detected"),
+    ("Check out our new product line", False, None, 0.0, "(GOOD) Legitimate product announcement - Safe"),
+    ("Visit our store for details", False, None, 0.0, "(GOOD) Benign store reference - Safe"),
+    ("Interested in great deals? Check out our collection", False, None, 0.0, "(GAP) Subtle marketing language - Non_Detected"),
 ])
 @allure.feature("Threat Classification")
 @allure.story("Spam Detection")
@@ -358,7 +358,7 @@ def test_spam_classification(text, expected_threat, expected_label, confidence_t
     logger.info("=" * 60)
 
     # Attach undetected gaps for non-detected cases
-    if description == "Subtle marketing language (NON-detected)":
+    if description == "(GAP) Subtle marketing language - Non_Detected":
         for gap in SPAM_GAPS:
             attach_undetected_gap_with_mitigation(
                 pattern_name=gap["name"],

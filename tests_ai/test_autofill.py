@@ -6,9 +6,9 @@ service generates correct email, phone, and address suggestions based
 on user input context.
 
 Test Coverage:
-- Email suggestion generation with format validation (SAFE)
-- Phone suggestion generation with format validation (SAFE)
-- Address suggestion generation with format validation (SAFE)
+- Email suggestion generation with format validation Safe
+- Phone suggestion generation with format validation Safe
+- Address suggestion generation with format validation Safe
 - Confidence score validation (0.0-1.0 range)
 - Format validation before output (no malformed suggestions)
 
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize("context,expected_count,expected_format_check,expected_confidence_threshold,description", [
-    ("user", 3, lambda x: all('@' in email for email in x), 0.5, "Standard user context (SAFE)"),
+    ("user", 3, lambda x: all('@' in email for email in x), 0.5, "(GOOD) Standard user context - Safe"),
 ])
 @allure.feature("Autofill Service")
 @allure.story("Email Suggestion Generation")
@@ -94,7 +94,7 @@ def test_email_suggestions(context, expected_count, expected_format_check, expec
 
 
 @pytest.mark.parametrize("context,expected_count,expected_format_check,expected_confidence_threshold,description", [
-    ("5551234567", 3, lambda x: all(c.isdigit() or c in '()- ' for phone in x for c in phone), 0.6, "US phone number (SAFE)"),
+    ("5551234567", 3, lambda x: all(c.isdigit() or c in '()- ' for phone in x for c in phone), 0.6, "(GOOD) US phone number - Safe"),
 ])
 @allure.feature("Autofill Service")
 @allure.story("Phone Suggestion Generation")
@@ -154,7 +154,7 @@ def test_phone_suggestions(context, expected_count, expected_format_check, expec
 
 
 @pytest.mark.parametrize("context,expected_count,expected_has_street,expected_confidence_threshold,description", [
-    ("123 Main St", 3, True, 0.6, "US street address (SAFE)"),
+    ("123 Main St", 3, True, 0.6, "(GOOD) US street address - Safe"),
 ])
 @allure.feature("Autofill Service")
 @allure.story("Address Suggestion Generation")
