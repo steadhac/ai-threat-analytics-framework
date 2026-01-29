@@ -6,8 +6,8 @@ summarizer reduces verbose threat reports to essential information while
 maintaining key details like threat type and compression ratio.
 
 Test Coverage:
-- Malware threat keywords preserved in summary (GOOD)
-- Phishing report compression works normally (GOOD)
+- Malware threat keywords preserved in summary 
+- Phishing report compression works normally 
 - Account compromise context lost in compression (GAP)
 - Compression ratio validation
 - Summary length constraint enforcement
@@ -68,14 +68,14 @@ SUMMARIZATION_GAPS = [
         100,
         True,
         0.75,
-        "Malware threat keywords preserved in summary (GOOD)"
+        "Malware threat keywords preserved in summary "
     ),
     (
         "A critical phishing attack was detected targeting enterprise users. The attack used sophisticated social engineering techniques. Multiple employees reported suspicious emails. The security team has implemented additional safeguards.",
         100,
         True,
         0.8,
-        "Phishing report compression works normally (GOOD)"
+        "Phishing report compression works normally "
     ),
     (
         "Unusual login from unknown device. Account access pattern changed. Multiple failed authentication attempts detected. Possible credential compromise. Immediate action required.",
