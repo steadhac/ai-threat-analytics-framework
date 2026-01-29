@@ -12,7 +12,7 @@ WHY TEST IT?
 - Validate it works across different data scales (1-10 vs 100-500 same behavior)
 
 THE GAP (Known Limitation):
-- Synthetic tests: Perfect data, 0% false positive rate (GOOD)
+- Synthetic tests: Perfect data, 0% false positive rate 
 - Production tests: Real noise, ~3% false positive rate (GAP - acceptable but documented)
 This gap is EXPECTED because real data has noise. The improvement path is documented.
 
@@ -174,12 +174,12 @@ def mock_production_data():
 @pytest.mark.parametrize("test_data,description,is_normal", [
     (
         [10, 12, 11, 13, 12, 11, 10, 12],
-        "Clean baseline data - all values similar, Z-score < 1.0 (GOOD)",
+        "Clean baseline data - all values similar, Z-score < 1.0 ",
         True
     ),
     (
         [10, 12, 11, 13, 12, 100, 10, 12],
-        "Data with spike at index 5 - value 100 is 10x baseline, Z-score ≈ 2.65 (GOOD)",
+        "Data with spike at index 5 - value 100 is 10x baseline, Z-score ≈ 2.65 ",
         False
     ),
 ])
