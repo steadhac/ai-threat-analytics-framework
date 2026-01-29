@@ -153,8 +153,26 @@ graph LR
     ALERT --> VulnMit2["T3: Jailbreak Detection<br/>T7: Accountability<br/>T8: Audit Trail"]
     LOGONLY --> VulnMit3["T1-T4: Input Protection<br/>T5: Error Prevention<br/>T6: Execution Isolation"]
     NONE --> VulnMit4["T1-T12: All Mitigations<br/>No false positives"]
+    
+    style Threat fill:#FFD700,stroke:#FF8C00,stroke-width:3px,color:#000,font-weight:bold
+    style TLA fill:#87CEEB,stroke:#0047AB,stroke-width:3px,color:#000,font-weight:bold
+    
+    style CRIT fill:#FF6347,stroke:#DC143C,stroke-width:2px,color:#fff,font-weight:bold
+    style HIGH fill:#FFA500,stroke:#FF8C00,stroke-width:2px,color:#000,font-weight:bold
+    style LOW fill:#4169E1,stroke:#00008B,stroke-width:2px,color:#fff,font-weight:bold
+    
+    style BLOCK fill:#FF4444,stroke:#990000,stroke-width:3px,color:#fff,font-weight:bold
+    style ALERT fill:#FFB347,stroke:#FF8C00,stroke-width:3px,color:#000,font-weight:bold
+    style LOGONLY fill:#4169E1,stroke:#00008B,stroke-width:3px,color:#fff,font-weight:bold
+    style NONE fill:#00DD00,stroke:#008800,stroke-width:3px,color:#000,font-weight:bold
+    
+    style VulnMit1 fill:#FF4444,stroke:#990000,stroke-width:2px,color:#fff
+    style VulnMit2 fill:#FFB347,stroke:#FF8C00,stroke-width:2px,color:#000
+    style VulnMit3 fill:#4169E1,stroke:#00008B,stroke-width:2px,color:#fff
+    style VulnMit4 fill:#00DD00,stroke:#008800,stroke-width:2px,color:#000
 ```
 ## 🔒 Vulnerability Coverage Matrix
+
 ``` mermaid
 graph TB
     subgraph T1T4["Input & Resource Protection"]
@@ -178,18 +196,24 @@ graph TB
         T12["T12: Advanced Attacks<br/>Multi-level response"]
     end
     
-    style T1 fill:#e1f5ff
-    style T4 fill:#e1f5ff
-    style T11 fill:#e1f5ff
-    style T2 fill:#f3e5f5
-    style T5 fill:#f3e5f5
-    style T6 fill:#f3e5f5
-    style T8 fill:#f3e5f5
-    style T3 fill:#fff3e0
-    style T7 fill:#fff3e0
-    style T9 fill:#fff3e0
-    style T10 fill:#fff3e0
-    style T12 fill:#fff3e0
+    style T1T4 fill:#00BFFF,stroke:#0066CC,stroke-width:3px,color:#000
+    style T5T8 fill:#FF69B4,stroke:#FF1493,stroke-width:3px,color:#fff
+    style T9T12 fill:#FF6347,stroke:#DC143C,stroke-width:3px,color:#fff
+    
+    style T1 fill:#00BFFF,stroke:#0066CC,stroke-width:2px,color:#000,font-weight:bold
+    style T4 fill:#00BFFF,stroke:#0066CC,stroke-width:2px,color:#000,font-weight:bold
+    style T11 fill:#00BFFF,stroke:#0066CC,stroke-width:2px,color:#000,font-weight:bold
+    
+    style T2 fill:#FF69B4,stroke:#FF1493,stroke-width:2px,color:#fff,font-weight:bold
+    style T5 fill:#FF69B4,stroke:#FF1493,stroke-width:2px,color:#fff,font-weight:bold
+    style T6 fill:#FF69B4,stroke:#FF1493,stroke-width:2px,color:#fff,font-weight:bold
+    style T8 fill:#FF69B4,stroke:#FF1493,stroke-width:2px,color:#fff,font-weight:bold
+    
+    style T3 fill:#FF6347,stroke:#DC143C,stroke-width:2px,color:#fff,font-weight:bold
+    style T7 fill:#FF6347,stroke:#DC143C,stroke-width:2px,color:#fff,font-weight:bold
+    style T9 fill:#FF6347,stroke:#DC143C,stroke-width:2px,color:#fff,font-weight:bold
+    style T10 fill:#FF6347,stroke:#DC143C,stroke-width:2px,color:#fff,font-weight:bold
+    style T12 fill:#FF6347,stroke:#DC143C,stroke-width:2px,color:#fff,font-weight:bold
 ```
 ## 🚀 Features
 
