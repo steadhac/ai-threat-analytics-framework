@@ -28,7 +28,7 @@ import pytest
 import logging
 import allure
 from core.autofill_service import AutofillService
-from tests_pipelines.allure_helpers import attach_mitigation
+from allure_helpers import attach_mitigation
 
 logger = logging.getLogger(__name__)
 

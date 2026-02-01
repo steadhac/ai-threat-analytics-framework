@@ -28,8 +28,7 @@ import pytest
 import logging
 import allure
 from core.anomaly_utils import detect_anomalies
-from .allure_helpers import attach_undetected_gap_with_mitigation
-
+from allure_helpers import attach_undetected_gap_with_mitigation
 logger = logging.getLogger(__name__)
 
 THRESHOLD_SYNTHETIC = 2.0

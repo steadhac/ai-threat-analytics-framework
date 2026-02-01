@@ -2,7 +2,7 @@
 import pytest
 import yaml
 from pathlib import Path
-from tests_pipelines.allure_helpers import attach_vulnerabilities_mitigated
+from allure_helpers import attach_vulnerabilities_mitigated
 
 @pytest.fixture(scope="session")
 def config():

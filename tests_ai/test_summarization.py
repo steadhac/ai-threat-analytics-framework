@@ -27,7 +27,7 @@ import pytest
 import logging
 import allure
 from core.summarizer import ThreatSummarizer
-from tests_pipelines.allure_helpers import attach_undetected_gap_with_mitigation
+from allure_helpers import attach_undetected_gap_with_mitigation
 
 logger = logging.getLogger(__name__)
 

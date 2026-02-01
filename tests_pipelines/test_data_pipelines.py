@@ -43,7 +43,7 @@ Usage:
 import pytest
 import logging
 import allure
-from .allure_helpers import attach_mitigation, attach_stage_details
+from allure_helpers import attach_mitigation, attach_stage_details
 
 logger = logging.getLogger(__name__)
 
