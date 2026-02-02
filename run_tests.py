@@ -4,9 +4,7 @@ AI & Threat Analytics Test Runner
 Entry point for executing the test suite
 """
 import sys
-import os
 import argparse
-import yaml
 import pytest
 from pathlib import Path
 
@@ -19,30 +17,18 @@ from core.logger import get_logger
 logger = get_logger(__name__)
 
 
-def load_config(config_path: str = "config/settings.yaml") -> dict:
-    """Load configuration from YAML file."""
-    config_file = PROJECT_ROOT / config_path
-    
-    if not config_file.exists():
-        logger.warning(f"Config file not found: {config_file}")
-        return {}
-    
-    with open(config_file, 'r') as f:
-        config = yaml.safe_load(f)
-    
-    logger.info(f"Loaded configuration from {config_file}")
-    return config
-
-
 def setup_environment():
     """Set up test environment."""
     # Create reports directory if it doesn't exist
     reports_dir = PROJECT_ROOT / "reports"
     reports_dir.mkdir(exist_ok=True)
     
-    # Load environment variables
-    from dotenv import load_dotenv
-    load_dotenv()
+    # Load environment variables (optional)
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass  # python-dotenv not installed, skip
     
     logger.info("Environment setup complete")
 
@@ -97,7 +83,6 @@ def main():
     
     # Setup
     setup_environment()
-    config = load_config()
     
     # Build pytest arguments
     pytest_args = []
