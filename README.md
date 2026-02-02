@@ -354,54 +354,68 @@ open reports/allure-report/index.html  # macOS
 xdg-open reports/allure-report/index.html  # Linux
 start reports\allure-report\index.html  # Windows
 ```
-## Project Structure
+### Project Structure
 
 The project follows this directory structure:
-```
+
 ai-threat-analytics-framework/
 │
-├── 📂 core/                         # Core implementation modules
-│   ├── __init__.py
-│   ├── api_client.py                # HTTP client for API calls
-│   ├── helpers.py                   # Utility functions
-│   ├── logger.py                    # Logging configuration
-│   ├── metrics.py                   # Performance metrics
-│   ├── security_checks.py           # Security validation
-│   ├── autofill_service.py          # ⭐ AI email suggestions
-│   ├── threat_classifier.py         # ⭐ Threat classification engine
-│   ├── guardrails.py                # ⭐ LLM security guardrails
-│   ├── summarizer.py                # ⭐ Text summarization
-│   └── anomaly_utils.py             # ⭐ Anomaly detection (z-score)
+├── 📂 core/ # Core implementation modules
+│ ├── init.py
+│ ├── api_client.py # HTTP client for API calls
+│ ├── helpers.py # Utility functions
+│ ├── logger.py # Logging configuration
+│ ├── metrics.py # Performance metrics
+│ ├── security_checks.py # Security validation
+│ ├── autofill_service.py # ⭐ AI email suggestions
+│ ├── threat_classifier.py # ⭐ Threat classification engine
+│ ├── guardrails.py # ⭐ LLM security guardrails
+│ ├── summarizer.py # ⭐ Text summarization
+│ ├── anomaly_utils.py # ⭐ Anomaly detection (z-score)
+│ └── anomaly_improvement.py # Anomaly detection enhancements
 │
-├── 📂 tests_ai/                     # AI/ML functionality tests (4 tests)
-│   ├── test_autofill.py             # Email suggestion tests
-│   ├── test_classification.py       # Threat detection tests
-│   ├── test_llm_guardrails.py       # Security guardrail tests
-│   └── test_summarization.py        # Summarization tests
+├── 📂 tests_ai/ # AI/ML functionality tests
+│ ├── init.py
+│ ├── test_autofill.py # Email suggestion tests
+│ ├── test_classification.py # Threat detection tests
+│ ├── test_llm_guardrails.py # Security guardrail tests
+│ └── test_summarization.py # Summarization tests
 │
-├── 📂 tests_pipelines/              # Data pipeline tests (3 tests)
-│   ├── test_anomaly_detection.py    # Anomaly detection tests
-│   ├── test_data_pipelines.py       # Data validation tests
-│   └── test_integration_ml.py       # End-to-end ML tests
+├── 📂 tests_pipelines/ # Data pipeline tests
+│ ├── init.py
+│ ├── test_anomaly_detection.py # Anomaly detection tests
+│ ├── test_anomaly_improvement.py # Anomaly improvement tests
+│ ├── test_data_pipelines.py # Data validation tests
+│ ├── test_integration_ml.py # End-to-end ML tests
+│ └── test_ml_integration_improvement.py # ML improvement tests
 │
-├── 📂 docs/                         # Documentation
-│   ├── TEST_PLAN.md                 # Testing strategy
-│   ├── TEST_CASES.md                # Detailed test specifications
-│   ├── TRACEABILITY_MATRIX.md       # Requirements mapping
-│   └── CONCEPTS.md                  # Technical concepts explained
+├── 📂 docs/ # Centralized documentation
+│ ├── CONCEPTS.md # Technical concepts explained
+│ ├── MITIGATIONS.md # Vulnerability mitigations
+│ ├── SETUP_GUIDE.md # Detailed setup instructions
+│ ├── TEST_PLAN.md # Testing strategy
+│ ├── TEST_CASES.md # Detailed test specifications
+│ └── TRACEABILITY_MATRIX.md # Requirements mapping
 │
-├── 📂 config/                       # Configuration files
-│   └── settings.yaml                # Application settings
+├── 📂 config/ # Configuration files
+│ ├── settings.yaml # Application settings
+│ └── test_data/
+│ └── sample_data.yaml # Sample test data
 │
-├── 📂 reports/                      # Generated test reports
+├── 📂 reports/ # Generated test reports
+│ ├── allure-report/ # Allure test reports
+│ ├── results.html # Test results (HTML)
+│ ├── test_logs.txt # Test execution logs
+│ └── test_results.html # HTML test report
 │
-├── 📄 requirements.txt              # Python dependencies
-├── 📄 run_tests.py                  # Test execution script
-├── 📄 conftest.py                   # Pytest configuration
-├── 📄 setup.cfg                     # Setup configuration
-├── 📄 SETUP_GUIDE.md               # Detailed setup instructions
-└── 📄 README.md                    # This file
-```
+├── 📄 allure_helpers.py # Shared Allure reporting utilities
+├── 📄 conftest.py # Pytest configuration & fixtures
+├── 📄 requirements.txt # Python dependencies
+├── 📄 run_tests.py # Test execution script
+├── 📄 setup.cfg # Setup configuration
+├── 📄 README.md # This file
+└── 📄 venv/ # Virtual environment
+
 
 ## 💡 How It Works
 ### Anomaly Detection (Z-Score)
