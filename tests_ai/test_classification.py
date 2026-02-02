@@ -31,7 +31,7 @@ import pytest
 import logging
 import allure
 from core.threat_classifier import ThreatClassifier
-from allure_helpers import attach_mitigation, attach_undetected_gap_with_mitigation, attach_guardrail_action
+from allure_helpers import attach_mitigation, attach_undetected_gap_with_mitigation
 
 logger = logging.getLogger(__name__)
 

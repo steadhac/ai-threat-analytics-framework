@@ -36,7 +36,7 @@ Compliance:
 """
 
 import numpy as np
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import Counter

@@ -18,7 +18,7 @@ EXPECTED RESULT:
 """
 
 import statistics
-from typing import List, Tuple, Dict, Any
+from typing import List, Dict, Any
 
 
 class AdaptiveAnomalyDetector:
