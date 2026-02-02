@@ -359,6 +359,7 @@ start reports\allure-report\index.html  # Windows
 The project follows this directory structure:
 
 ai-threat-analytics-framework/
+``` tree
 │
 ├── 📂 core/ # Core implementation modules
 │ ├── init.py
@@ -415,7 +416,7 @@ ai-threat-analytics-framework/
 ├── 📄 setup.cfg # Setup configuration
 ├── 📄 README.md # This file
 └── 📄 venv/ # Virtual environment
-
+```
 
 ## 💡 How It Works
 ### Anomaly Detection (Z-Score)
