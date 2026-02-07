@@ -56,7 +56,7 @@ Value 17: z = (17 - 10.57) / 4.35 = 1.48  ✅ Normal
 # Step 4: Apply threshold (2.0)
 # If |z| > 2.0 → Flag as anomaly
 # In this case: 1.74 < 2.0, so not flagged (borderline!)
-
+```
 ### Understanding Threshold
 ## The Threshold Decision:
 
@@ -110,7 +110,8 @@ Spam filter	        Medium (miss email)	        Low (see spam)	        2.0 - 2.5
 Fraud detection	    Low (verify)	            High (lose money)	    1.5 - 2.0
 Performance alerts	High (alert fatigue)	    Medium (slow system)	2.5 - 3.0
 
-# Threat Classification
+
+## Threat Classification
 ## What is Threat Classification?
 Threat classification is the process of categorizing identified security threats based on their characteristics, severity, and impact. This enables effective prioritization, response planning, and resource allocation.
 
@@ -182,7 +183,7 @@ Components to Evaluate:
 - Entire organization
 - External partners affected
 
-# Classification Algorithm
+## Classification Algorithm
 ``` python
 def classify_threat(threat_data):
     """
